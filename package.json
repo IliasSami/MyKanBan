@@ -1,8 +1,38 @@
 {
   "name": "mykanban",
-  "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "Free, open-source, ultra-fast collaborative Kanban & Agile Scrum workflow engine. Native Markdown (.md) & CSV ingestion, guided AI ChatBot preformatter (Claude, ChatGPT, Gemini), 3D tactile UI, real-time sync, and 1-click Cloudflare Pages deployment.",
   "type": "module",
+  "license": "MIT",
+  "homepage": "https://mykanban.pages.dev",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/IliasSami/MyKanBan.git"
+  },
+  "bugs": {
+    "url": "https://github.com/IliasSami/MyKanBan/issues"
+  },
+  "keywords": [
+    "kanban",
+    "kanban-board",
+    "agile",
+    "scrum",
+    "markdown",
+    "markdown-parser",
+    "ai-preformatter",
+    "claude",
+    "chatgpt",
+    "gemini",
+    "deepseek",
+    "project-management",
+    "react19",
+    "vite",
+    "tailwindcss",
+    "cloudflare-pages",
+    "open-source",
+    "productivity",
+    "workflow-automation"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

@@ -1,0 +1,39 @@
+# MyKanBan
+
+> Free, open-source, ultra-fast collaborative Kanban & Agile Scrum workflow engine. Native Markdown (.md) and CSV ingestion, guided AI ChatBot preformatting (Claude, ChatGPT, Gemini), 3D tactile interface, real-time synchronization, and zero-hydration latency.
+
+- **Live Production App**: https://mykanban.pages.dev
+- **GitHub Repository**: https://github.com/IliasSami/MyKanBan
+- **License**: MIT (100% Free & Open-Source)
+- **Tech Stack**: React 19, TypeScript, Vite, Tailwind CSS v4, @dnd-kit, Cloudflare Pages
+
+## Core Capabilities
+
+1. **Native Markdown & CSV Ingestion**: Transforms Markdown task lists (`## Column`, `- [ ] Task @Role #priority ~points`) or CSV dumps directly into draggable Kanban cards.
+2. **AI ChatBot Preformatter**: Guided 3-step wizard that generates tailored master prompts for Claude, ChatGPT, Gemini, and DeepSeek to convert raw meeting notes, SEO audits, or PRDs into native MyKanBan format.
+3. **Enterprise Agile & Scrum Suite**: Fibonacci story point estimation, real-time velocity progress bars, Work-in-Progress (WIP) column limits, and completion celebrations.
+4. **Real-Time Collaboration**: Instant room-code sharing (e.g. `KAN-842`) with zero-latency tab/window sync via `BroadcastChannel` and plug-and-play Convex Cloud support.
+5. **Mobile-Native UX**: Dedicated Notion/Google Keep-style responsive mobile interface with fluid touch-first gesture physics.
+
+## MyKanBan Gold-Standard Markdown Syntax
+
+```markdown
+# Project / Sprint Title
+> Sprint context blockquote
+
+## Backlog
+- [ ] Task Title @Role #priority ~points #tag1 #tag2
+  > Context rationale or metric explanation
+  - [ ] Implementation subtask checklist 1
+  - [ ] Implementation subtask checklist 2
+
+## Sprint To-Do
+## In Progress
+## Review / QA
+## Done
+- [x] Completed task Title @Role #priority ~points #tag
+```
+
+- **Roles**: `@Dev`, `@Content`, `@SEO`, `@DevOps`, `@QA`, `@Copy`, `@Design`, `@Lead`
+- **Priorities**: `#urgent`, `#high`, `#medium`, `#low`
+- **Story Points**: `~1`, `~2`, `~3`, `~5`, `~8`
