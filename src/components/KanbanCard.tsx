@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { CheckSquare, Trash2, ArrowRight } from 'lucide-react';
+import { CheckSquare, Trash2, ArrowRight, Check } from 'lucide-react';
 import type { Task } from '../types/kanban';
 
 interface KanbanCardProps {
@@ -218,28 +218,51 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({
 
       {/* Clean Description */}
       {task.description && (
-        <p className="text-[11px] text-zinc-500 dark:text-zinc-400 line-clamp-2 mb-2.5 font-normal leading-relaxed">
-          {task.description}
-        </p>
+        <div className="mb-3 relative group/desc">
+          <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-blue-500/20 group-hover/desc:bg-blue-500/50 rounded-full transition-colors" />
+          <p className="pl-2.5 text-[11px] text-zinc-500 dark:text-zinc-400 line-clamp-3 font-normal leading-relaxed">
+            {task.description}
+          </p>
+        </div>
       )}
 
-      {/* Subtask Progress Micro-Bar */}
+      {/* Subtask Checklist & Progress */}
       {totalSubtasks > 0 && (
-        <div className="mb-2.5">
-          <div className="flex items-center justify-between text-[10px] font-mono text-zinc-500 dark:text-zinc-400 mb-1">
+        <div className="mb-3 space-y-1.5">
+          <div className="flex items-center justify-between text-[10px] font-mono text-zinc-500 dark:text-zinc-400">
             <span className="flex items-center gap-1">
               <CheckSquare className="w-3 h-3 text-blue-500" />
               <span>Subtasks</span>
             </span>
             <span>
-              {completedSubtasks}/{totalSubtasks} ({subtaskProgress}%)
+              {completedSubtasks}/{totalSubtasks}
             </span>
           </div>
-          <div className="w-full bg-zinc-100 dark:bg-zinc-800 h-1.5 rounded-full overflow-hidden border border-zinc-200 dark:border-zinc-700/50">
+          
+          <div className="w-full bg-zinc-100 dark:bg-zinc-800 h-1 rounded-full overflow-hidden mb-2">
             <div
               className="h-full bg-blue-600 dark:bg-blue-500 rounded-full transition-all duration-300"
               style={{ width: `${subtaskProgress}%` }}
             />
+          </div>
+
+          {/* Render up to 3 subtasks */}
+          <div className="space-y-1 mt-1.5">
+            {task.subtasks!.slice(0, 3).map((sub) => (
+              <div key={sub.id} className="flex items-start gap-1.5 opacity-90">
+                <div className="mt-0.5 shrink-0 w-3 h-3 rounded-sm border border-zinc-300 dark:border-zinc-700 flex items-center justify-center bg-white dark:bg-zinc-900">
+                  {sub.completed && <Check className="w-2.5 h-2.5 text-blue-600 dark:text-blue-400" />}
+                </div>
+                <span className={`text-[10px] leading-tight ${sub.completed ? 'line-through text-zinc-400 dark:text-zinc-500' : 'text-zinc-600 dark:text-zinc-300'} line-clamp-1`}>
+                  {sub.title}
+                </span>
+              </div>
+            ))}
+            {totalSubtasks > 3 && (
+              <div className="text-[9px] font-mono text-zinc-400 pl-4.5 pt-0.5">
+                +{totalSubtasks - 3} more subtasks...
+              </div>
+            )}
           </div>
         </div>
       )}

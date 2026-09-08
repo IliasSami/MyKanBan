@@ -14,4 +14,13 @@ export default defineConfig({
       '@': path.resolve(import.meta.dirname, './src'),
     },
   },
+  server: {
+    proxy: {
+      '/api/ai-convert': {
+        target: 'https://router.bynara.id/v1/chat/completions',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/ai-convert/, '')
+      }
+    }
+  }
 })

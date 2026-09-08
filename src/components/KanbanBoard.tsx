@@ -178,15 +178,15 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
       <div
         id="kanban-main"
         tabIndex={-1}
-        className="flex-1 overflow-x-auto p-4 lg:p-6 bg-zinc-100/70 dark:bg-zinc-950 transition-colors focus:outline-none"
+        className="flex-1 overflow-x-auto p-4 md:p-6 bg-zinc-100/70 dark:bg-zinc-950 transition-colors focus:outline-none snap-x snap-mandatory md:snap-none"
       >
-        <div className="flex items-start gap-4 min-w-max pb-6">
+        <div className="flex items-start gap-4 md:gap-6 min-w-max pb-6 md:pb-8">
           {board.columns.length === 0 ? (
             <div className="flex items-start gap-4" aria-label="Loading workspace columns">
               {['Backlog', 'Sprint To-Do', 'In Progress', 'Done'].map((placeholder) => (
                 <div
                   key={placeholder}
-                  className="w-72 min-w-[288px] bg-white/60 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-850 rounded-xl p-3 flex flex-col gap-3 animate-pulse"
+                  className="w-[85vw] sm:w-72 min-w-[288px] max-w-[320px] sm:max-w-[288px] bg-white/60 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-850 rounded-xl p-3 flex flex-col gap-3 animate-pulse snap-center"
                 >
                   <div className="flex items-center justify-between pb-2 border-b border-zinc-200/80 dark:border-zinc-800/60">
                     <span className="text-xs font-mono text-zinc-500 uppercase tracking-wider">{placeholder}</span>
@@ -222,7 +222,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
           )}
 
           {/* Add New Column */}
-          <div className="w-72 min-w-[288px]">
+          <div className="w-[85vw] sm:w-72 min-w-[288px] max-w-[320px] sm:max-w-[288px] snap-center">
             {isAddingCol ? (
               <form
                 onSubmit={handleCreateColumn}

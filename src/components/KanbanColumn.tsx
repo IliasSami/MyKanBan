@@ -81,7 +81,7 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
   return (
     <div
       ref={setNodeRef}
-      className={`column-3d flex flex-col w-72 min-w-[288px] max-w-[288px] bg-white/95 dark:bg-zinc-950/90 backdrop-blur-xs border rounded-2xl p-3.5 transition-all duration-200 max-h-[calc(100vh-170px)] ${
+      className={`column-3d snap-center flex flex-col w-[85vw] sm:w-72 min-w-[288px] max-w-[320px] sm:max-w-[288px] bg-white/95 dark:bg-zinc-950/90 backdrop-blur-xs border rounded-2xl p-3.5 transition-all duration-200 max-h-[calc(100vh-170px)] ${
         isOver
           ? 'border-blue-500 ring-2 ring-blue-500/20 bg-blue-50/30 dark:bg-blue-950/20'
           : isWipExceeded

@@ -202,11 +202,39 @@ export function inspectDocument(
     0
   );
 
-  // High-fidelity native Markdown: has explicit column headers AND task bullets
-  const isHighConfidenceNativeMD =
-    foundColumnHeader && taskBulletCount >= 1 && tasksCount > 0;
+  // Count explicit checkbox markers: `- [ ]` or `- [x]`
+  let checkboxCount = 0;
+  for (const line of lines) {
+    if (/^[-*+]\s+\[[ xX]\]/.test(line.trim())) {
+      checkboxCount++;
+    }
+  }
 
-  if (isHighConfidenceNativeMD && preferredType !== 'notes') {
+  // Detect report/document headings that indicate an article, audit, or documentation rather than a Kanban board
+  const hasReportHeadings = parsed.columns.some((c) =>
+    /^(?:\d+\.|\d+\s+|Executive|Summary|Appendix|Glossary|Methodology|Scope|Overview|Table|Background|Findings|Analysis|Sources|Baseline|Part\s+\d+|Chapter\s+\d+)/i.test(
+      c.title.trim()
+    )
+  );
+
+  // Check for recognized standard Kanban stages (Backlog, To Do, Sprint, In Progress, Review, QA, Done, etc.)
+  const standardStageRegex = /^(?:Backlog|To\s*Do|Sprint|In\s*Progress|Doing|Review|QA|Testing|Done|Completed|Archive|Blocked|Icebox|P[0-4]|Urgent)/i;
+  const hasRecognizedKanbanStage = parsed.columns.some((c) => standardStageRegex.test(c.title.trim()));
+
+  // High-fidelity native Markdown requires:
+  // 1. Column count between 1 and 10 (Kanban boards have a small, focused set of lanes, never 15 or 32!)
+  // 2. No report-style headings (Executive Summary, 0. ..., 1. ..., Appendix)
+  // 3. Substantial proportion of checkbox task bullets (- [ ] or - [x]) OR clear recognized Kanban stage names
+  // 4. Prose lines must not heavily outnumber task bullets
+  const isHighConfidenceNativeMD =
+    parsed.columns.length >= 1 &&
+    parsed.columns.length <= 10 &&
+    !hasReportHeadings &&
+    tasksCount > 0 &&
+    (checkboxCount > 0 || hasRecognizedKanbanStage) &&
+    (checkboxCount >= tasksCount * 0.4 || (hasRecognizedKanbanStage && proseLineCount < taskBulletCount * 2));
+
+  if (isHighConfidenceNativeMD) {
     return {
       isParsable: true,
       docType: 'markdown',
@@ -226,15 +254,23 @@ export function inspectDocument(
 
   // If user selected "notes" or no explicit columns were found, or it's mostly prose / unstructured
   const missingReason: string[] = [];
+  if (hasReportHeadings) {
+    missingReason.push('Document contains technical audit, report, or article headings (e.g. Executive Summary, Glossary, Sections)');
+  }
+  if (parsed.columns.length > 10) {
+    missingReason.push(`Detected ${parsed.columns.length} document sections. Standard Kanban boards use 3–6 focused workflow stages.`);
+  }
   if (!foundColumnHeader) {
     missingReason.push('No Kanban column headers found (e.g. ## To Do, ## In Progress, ## Done)');
   }
-  if (taskBulletCount === 0) {
-    missingReason.push('No task bullet items found (e.g. - [ ] Task description)');
+  if (taskBulletCount === 0 || checkboxCount === 0) {
+    missingReason.push('Missing native checkbox task items (e.g. - [ ] Actionable task)');
   }
   if (proseLineCount > taskBulletCount * 2) {
-    missingReason.push('Document contains unstructured narrative prose or meeting notes');
+    missingReason.push('Document contains unstructured narrative prose or audit notes');
   }
+
+  const isAuditOrReport = hasReportHeadings || parsed.columns.length > 8;
 
   return {
     isParsable: false,
@@ -246,9 +282,12 @@ export function inspectDocument(
     pointsCount: 0,
     diagnosis: {
       status: 'needs_ai',
-      title: 'Unstructured Document Detected (Needs Conversion)',
-      message:
-        'This document is not in native MyKanBan format. Use the integrated Nara AI to automatically parse, structure stages, and extract tasks.',
+      title: isAuditOrReport
+        ? 'Technical Audit / Report Detected (Needs Conversion)'
+        : 'Unstructured Document Detected (Needs Conversion)',
+      message: isAuditOrReport
+        ? 'This document contains comprehensive audit findings or report sections. Use the Smart Converter to structure it into standard sprint stages with actionable tasks, context metrics, and subtasks.'
+        : 'This document is not in native MyKanBan format. Use the integrated Smart Converter / AI to automatically parse, structure stages, and extract tasks.',
       details: missingReason.length > 0 ? missingReason : ['Document requires stage and task structuring'],
     },
   };
