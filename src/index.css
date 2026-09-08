@@ -105,3 +105,79 @@ html, body {
   background: rgba(113, 113, 122, 0.5);
 }
 
+/* 3D Materialistic Elevation & Depth Tokens */
+.card-3d {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.03), inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card-3d:hover {
+  box-shadow: 0 10px 20px -3px rgba(0, 0, 0, 0.08), 0 4px 8px -2px rgba(0, 0, 0, 0.04), inset 0 1px 0 0 rgba(255, 255, 255, 1);
+  transform: translateY(-2px);
+}
+
+.card-3d:active {
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.06), inset 0 1px 0 0 rgba(255, 255, 255, 0.7);
+  transform: translateY(0px) scale(0.99);
+}
+
+.dark .card-3d {
+  box-shadow: 0 4px 8px -2px rgba(0, 0, 0, 0.5), 0 2px 4px -2px rgba(0, 0, 0, 0.4), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+}
+
+.dark .card-3d:hover {
+  box-shadow: 0 12px 24px -4px rgba(0, 0, 0, 0.7), 0 6px 12px -3px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+  transform: translateY(-2px);
+}
+
+.dark .card-3d:active {
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+  transform: translateY(0px) scale(0.99);
+}
+
+/* Blocky Modular Column Styling */
+.column-3d {
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.04), 0 2px 6px -1px rgba(0, 0, 0, 0.02), inset 0 1px 0 0 rgba(255, 255, 255, 0.8);
+}
+
+.dark .column-3d {
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.6), 0 4px 12px -2px rgba(0, 0, 0, 0.4), inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Tactile Mechanical Button */
+.btn-3d {
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.06), inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+}
+
+.btn-3d:active {
+  transform: translateY(1px);
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.15);
+}
+
+/* Google Keep style Floating Action Button */
+.fab-3d {
+  box-shadow: 0 8px 20px -2px rgba(37, 99, 235, 0.4), 0 4px 10px -2px rgba(0, 0, 0, 0.2), inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fab-3d:hover {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 14px 28px -4px rgba(37, 99, 235, 0.5), 0 6px 14px -3px rgba(0, 0, 0, 0.3), inset 0 1px 0 0 rgba(255, 255, 255, 0.4);
+}
+
+.fab-3d:active {
+  transform: translateY(1px) scale(0.97);
+}
+
+/* Safe areas for mobile devices */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+}
+
+

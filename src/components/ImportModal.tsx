@@ -6,8 +6,19 @@ import {
   Sparkles,
   CheckCircle2,
   FileUp,
+  Loader2,
+  Settings,
+  AlertCircle,
+  Wand2,
 } from 'lucide-react';
 import { parseMarkdown, parseCSV, parseJSON } from '../utils/parser';
+import {
+  convertWithAI,
+  convertWithLocalHeuristic,
+  getStoredAISettings,
+  saveAISettings,
+  POPULAR_MODELS,
+} from '../services/aiConverter';
 
 interface ImportModalProps {
   isOpen: boolean;
@@ -117,12 +128,48 @@ const SAMPLE_CSV = `Title,Column,Assignee,Priority,Story Points,Tags,Description
 `;
 
 export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImport }) => {
-  const [activeTab, setActiveTab] = useState<'paste' | 'upload'>('paste');
+  const [activeTab, setActiveTab] = useState<'paste' | 'upload' | 'ai'>('ai');
   const [format, setFormat] = useState<'markdown' | 'json' | 'csv'>('markdown');
   const [textContent, setTextContent] = useState(SAMPLE_MARKDOWN);
   const [replaceExisting, setReplaceExisting] = useState(true);
   const [dragOver, setDragOver] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
+
+  // AI Conversion States
+  const [aiInput, setAiInput] = useState('');
+  const [isConverting, setIsConverting] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+  const [aiSettings, setAiSettings] = useState(getStoredAISettings);
+  const [showAiSettings, setShowAiSettings] = useState(false);
+
+  const handleConvertAI = async () => {
+    if (!aiInput.trim()) return;
+    setIsConverting(true);
+    setAiError(null);
+    try {
+      const converted = await convertWithAI(aiInput, {
+        apiKey: aiSettings.apiKey,
+        model: aiSettings.model,
+        baseUrl: aiSettings.baseUrl,
+      });
+      setTextContent(converted);
+      setFormat('markdown');
+      setActiveTab('paste');
+    } catch (err: any) {
+      setAiError(err.message || 'AI conversion failed.');
+    } finally {
+      setIsConverting(false);
+    }
+  };
+
+  const handleConvertLocalFallback = () => {
+    if (!aiInput.trim()) return;
+    const converted = convertWithLocalHeuristic(aiInput);
+    setTextContent(converted);
+    setFormat('markdown');
+    setActiveTab('paste');
+    setAiError(null);
+  };
 
   // Live Parsing preview
   const parseResult = useMemo(() => {
@@ -227,6 +274,17 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
           <div className="flex flex-wrap items-center justify-between gap-3 pb-2 border-b border-zinc-200 dark:border-zinc-800/80">
             <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-900 p-1 rounded-lg border border-zinc-200 dark:border-zinc-800 text-xs">
               <button
+                onClick={() => setActiveTab('ai')}
+                className={`px-3 py-1 rounded font-medium transition flex items-center gap-1.5 ${
+                  activeTab === 'ai'
+                    ? 'btn-3d bg-blue-600 text-white shadow-xs'
+                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
+                }`}
+              >
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                <span>AI Convert</span>
+              </button>
+              <button
                 onClick={() => setActiveTab('paste')}
                 className={`px-3 py-1 rounded font-medium transition flex items-center gap-1.5 ${
                   activeTab === 'paste'
@@ -235,7 +293,7 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
                 }`}
               >
                 <FileText className="w-3.5 h-3.5" />
-                Text Editor
+                <span>Editor</span>
               </button>
               <button
                 onClick={() => setActiveTab('upload')}
@@ -246,7 +304,7 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
                 }`}
               >
                 <FileUp className="w-3.5 h-3.5" />
-                Upload File
+                <span>Upload</span>
               </button>
             </div>
 
@@ -289,7 +347,153 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
             </div>
           </div>
 
-          {activeTab === 'upload' ? (
+          {activeTab === 'ai' ? (
+            /* AI Conversion View */
+            <div className="space-y-3">
+              <div className="flex items-center justify-between text-xs pb-1">
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5">
+                    <Wand2 className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                    AI Ingestion Engine (Nara Router)
+                  </span>
+                  <span className="text-[10px] font-mono px-1.5 py-0.2 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 rounded border border-blue-200 dark:border-blue-900/60">
+                    {aiSettings.model}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setAiInput(
+                        `Meeting Notes from Sprint Planning:\n- We urgently need to fix the session token expiry bug on mobile. Assign to Alex, estimated 3 points.\n- Sarah is going to build the dark mode toggle and contrast settings (high priority, 5 points). Steps: audit color tokens, add aria-live announcer, test with VoiceOver.\n- Research Redis edge caching for future sprint (2 points).\n- Dave already completed the initial Vite deployment setup.`
+                      )
+                    }
+                    className="text-[11px] text-blue-600 dark:text-blue-400 hover:underline"
+                  >
+                    Paste Sample Notes
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowAiSettings(!showAiSettings)}
+                    className="p-1 rounded text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200 transition"
+                    title="Configure AI Settings"
+                  >
+                    <Settings className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* AI Settings Drawer */}
+              {showAiSettings && (
+                <div className="p-3 bg-zinc-50 dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 text-xs space-y-2 animate-in fade-in duration-150">
+                  <div className="flex items-center justify-between font-semibold text-zinc-800 dark:text-zinc-200">
+                    <span>AI Model & Key Settings</span>
+                    <button
+                      onClick={() => setShowAiSettings(false)}
+                      className="text-zinc-400 hover:text-zinc-600"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-[11px] text-zinc-500 mb-1">Model</label>
+                      <select
+                        value={aiSettings.model}
+                        onChange={(e) => {
+                          const updated = { ...aiSettings, model: e.target.value };
+                          setAiSettings(updated);
+                          saveAISettings(updated);
+                        }}
+                        className="w-full bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 rounded-lg px-2 py-1 text-xs"
+                      >
+                        {POPULAR_MODELS.map((m) => (
+                          <option key={m.id} value={m.id}>
+                            {m.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[11px] text-zinc-500 mb-1">API Key</label>
+                      <input
+                        type="password"
+                        value={aiSettings.apiKey}
+                        onChange={(e) => {
+                          const updated = { ...aiSettings, apiKey: e.target.value };
+                          setAiSettings(updated);
+                          saveAISettings(updated);
+                        }}
+                        placeholder="sk-..."
+                        className="w-full bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 rounded-lg px-2 py-1 text-xs font-mono"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Raw Notes Input */}
+              <textarea
+                value={aiInput}
+                onChange={(e) => setAiInput(e.target.value)}
+                placeholder="Paste any messy notes, sprint minutes, Jira tasks, or product specifications here... Our integrated AI will clean, structure, and convert it into a visual Kanban board."
+                rows={7}
+                className="w-full bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl p-3 text-xs text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition resize-y leading-relaxed"
+              />
+
+              {/* Error Notice & Fallback */}
+              {aiError && (
+                <div className="p-3 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 rounded-xl text-xs space-y-2">
+                  <div className="flex items-start gap-2 text-red-700 dark:text-red-300 font-medium">
+                    <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                    <span>{aiError}</span>
+                  </div>
+                  <div className="flex items-center gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={handleConvertLocalFallback}
+                      className="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-500 text-white font-medium text-xs transition"
+                    >
+                      ⚡ Convert with Smart Local Parser (Instant & Free)
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Conversion Buttons */}
+              <div className="flex items-center gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={handleConvertAI}
+                  disabled={isConverting || !aiInput.trim()}
+                  className="btn-3d flex-1 py-2.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-semibold text-xs rounded-xl transition flex items-center justify-center gap-2 shadow-xs"
+                >
+                  {isConverting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Converting with {aiSettings.model}...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4 text-amber-300" />
+                      <span>1-Click AI Convert</span>
+                    </>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleConvertLocalFallback}
+                  disabled={!aiInput.trim()}
+                  className="px-4 py-2.5 bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 disabled:opacity-50 text-zinc-800 dark:text-zinc-200 font-medium text-xs rounded-xl border border-zinc-200 dark:border-zinc-800 transition"
+                  title="Instant offline rule-based parser"
+                >
+                  Offline Parser
+                </button>
+              </div>
+            </div>
+          ) : activeTab === 'upload' ? (
             /* Dropzone */
             <div
               onDragOver={(e) => {

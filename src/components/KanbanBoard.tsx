@@ -37,6 +37,9 @@ interface KanbanBoardProps {
   onDeleteTask: (taskId: string) => void;
   onAddColumn: (title: string) => void;
   onOpenTaskDetail: (task: Task) => void;
+  searchQuery?: string;
+  priorityFilter?: string | null;
+  density?: 'comfortable' | 'compact';
 }
 
 export const KanbanBoard: React.FC<KanbanBoardProps> = ({
@@ -48,11 +51,37 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
   onDeleteTask,
   onAddColumn,
   onOpenTaskDetail,
+  searchQuery = '',
+  priorityFilter = null,
+  density = 'comfortable',
 }) => {
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [isAddingCol, setIsAddingCol] = useState(false);
   const [newColTitle, setNewColTitle] = useState('');
   const { announce } = useAccessibility();
+
+  const handleMoveToNextStage = (taskId: string) => {
+    const task = board.tasks.find((t) => t.id === taskId);
+    if (!task) return;
+    const currentColIndex = board.columns.findIndex((c) => c.id === task.columnId);
+    if (currentColIndex < 0 || currentColIndex >= board.columns.length - 1) return;
+    const nextCol = board.columns[currentColIndex + 1];
+    const targetOrder = board.tasks.filter((t) => t.columnId === nextCol.id).length;
+    onMoveTask(taskId, nextCol.id, targetOrder);
+    announce(`Moved ${task.title} to ${nextCol.title}`);
+  };
+
+  const filterTask = (task: Task): boolean => {
+    if (priorityFilter && task.priority !== priorityFilter) return false;
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase().trim();
+    if (task.title.toLowerCase().includes(q)) return true;
+    if (task.description?.toLowerCase().includes(q)) return true;
+    if (task.assignee?.toLowerCase().includes(q.replace('@', ''))) return true;
+    if (task.tags.some((t) => t.toLowerCase().includes(q.replace('#', '')))) return true;
+    if (task.priority.toLowerCase() === q.replace('#', '')) return true;
+    return false;
+  };
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -172,7 +201,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
           ) : (
             board.columns.map((column) => {
               const columnTasks = board.tasks
-                .filter((t) => t.columnId === column.id)
+                .filter((t) => t.columnId === column.id && filterTask(t))
                 .sort((a, b) => a.order - b.order);
 
               return (
@@ -185,6 +214,8 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
                   onUpdateColumn={onUpdateColumn}
                   onDeleteColumn={onDeleteColumn}
                   onDeleteTask={onDeleteTask}
+                  density={density}
+                  onMoveTaskToNextStage={handleMoveToNextStage}
                 />
               );
             })
