@@ -1,7 +1,11 @@
 {
   "name": "mykanban",
   "version": "1.0.0",
-  "description": "Free, open-source, ultra-fast collaborative Kanban & Agile Scrum workflow engine. Native Markdown (.md) & CSV ingestion, guided AI ChatBot preformatter (Claude, ChatGPT, Gemini), 3D tactile UI, real-time sync, and 1-click Cloudflare Pages deployment.",
+  "description": "Free, open-source, ultra-fast collaborative Kanban & Agile Scrum workflow engine built from scratch for the community by Ilias Sami (https://iliassami.com). Native Markdown (.md) & CSV ingestion, guided AI ChatBot preformatter (Claude, ChatGPT, Gemini), 3D tactile UI, real-time sync, and 1-click Cloudflare Pages deployment.",
+  "author": {
+    "name": "Ilias Sami",
+    "url": "https://iliassami.com"
+  },
   "type": "module",
   "license": "MIT",
   "homepage": "https://mykanban.pages.dev",

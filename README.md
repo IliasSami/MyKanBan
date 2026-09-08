@@ -5,7 +5,11 @@
 **The Ultra-Fast, Open-Source Collaborative Agile Scrum Kanban Engine**  
 *Native Markdown (.md) & CSV Ingestion • Guided AI ChatBot Preformatter • 3D Tactile UI • Real-Time Sync*
 
+**Built from scratch for the community by [Ilias Sami](https://iliassami.com)**  
+*100% Free & Open-Source Forever*
+
 [![Live Demo](https://img.shields.io/badge/Live_Demo-mykanban.pages.dev-2563eb?style=for-the-badge&logo=cloudflare&logoColor=white)](https://mykanban.pages.dev)
+[![Creator: Ilias Sami](https://img.shields.io/badge/Creator-Ilias_Sami-7c3aed?style=for-the-badge&logo=googlechrome&logoColor=white)](https://iliassami.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald?style=for-the-badge)](LICENSE)
 [![React 19](https://img.shields.io/badge/React-19.2-61dafb?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
 [![Vite](https://img.shields.io/badge/Vite-8.2-646cff?style=for-the-badge&logo=vite&logoColor=white)](https://vite.dev)
@@ -13,7 +17,7 @@
 [![Cloudflare Pages](https://img.shields.io/badge/Hosted_on-Cloudflare_Pages-f38020?style=for-the-badge&logo=cloudflare&logoColor=white)](https://pages.cloudflare.com)
 [![PRs Welcome](https://img.shields.io/badge/PRs-Welcome-brightgreen?style=for-the-badge)](https://github.com/IliasSami/MyKanBan/pulls)
 
-[**Explore Live Demo**](https://mykanban.pages.dev) • [**Read Documentation**](https://github.com/IliasSami/MyKanBan#readme) • [**Report an Issue**](https://github.com/IliasSami/MyKanBan/issues) • [**Contribute**](https://github.com/IliasSami/MyKanBan/blob/main/CONTRIBUTING.md)
+[**Explore Live Demo**](https://mykanban.pages.dev) • [**Creator's Website**](https://iliassami.com) • [**Read Documentation**](https://github.com/IliasSami/MyKanBan#readme) • [**Report an Issue**](https://github.com/IliasSami/MyKanBan/issues) • [**Contribute**](https://github.com/IliasSami/MyKanBan/blob/main/CONTRIBUTING.md)
 
 </div>
 
@@ -21,7 +25,7 @@
 
 ## 📖 What is MyKanBan?
 
-> **MyKanBan** is an open-source, desktop-grade collaborative Kanban board and Agile Scrum workflow engine designed for high-performance engineering teams, developers, and technical project managers. Built with pure **React 19, TypeScript, and Tailwind CSS**, MyKanBan runs with zero hydration lag, offers native **Markdown (`.md`) and CSV import/export**, and features a guided **AI ChatBot Preformatter** that enables users to convert messy meeting notes, SEO audits, or PRDs into structured agile workflows using **Claude, ChatGPT, Gemini, or DeepSeek**.
+> **MyKanBan** is an open-source, desktop-grade collaborative Kanban board and Agile Scrum workflow engine designed for high-performance engineering teams, developers, and technical project managers. Built from scratch for the community by **[Ilias Sami](https://iliassami.com)** with pure **React 19, TypeScript, and Tailwind CSS**, MyKanBan runs with zero hydration lag, offers native **Markdown (`.md`) and CSV import/export**, and features a guided **AI ChatBot Preformatter** that enables users to convert messy meeting notes, SEO audits, or PRDs into structured agile workflows using **Claude, ChatGPT, Gemini, or DeepSeek**.
 
 Unlike heavy project management suites that trap your data behind paywalls, MyKanBan is **100% free, MIT-licensed, offline-first, and Git-friendly**, deploying effortlessly to **Cloudflare Pages** with unlimited free bandwidth.
 
@@ -228,6 +232,18 @@ Feel free to check the [issues page](https://github.com/IliasSami/MyKanBan/issue
 
 ---
 
+## 👨‍💻 Creator & Community Mission
+
+**MyKanBan** was envisioned, designed, and built completely from scratch by **[Ilias Sami](https://iliassami.com)** as a free, open-source gift for the developer, product, and agile community worldwide.
+
+- 🌐 **Website**: [iliassami.com](https://iliassami.com)
+- 🐙 **GitHub Profile**: [@IliasSami](https://github.com/IliasSami)
+- 📦 **Source Repository**: [github.com/IliasSami/MyKanBan](https://github.com/IliasSami/MyKanBan)
+
+No subscription gates, no proprietary data lock-in, and no hidden fees — built from scratch so teams everywhere can ship better software with complete data sovereignty.
+
+---
+
 ## 📄 License
 
 Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for more information.  
@@ -236,5 +252,5 @@ Free for commercial and non-commercial use by everyone.
 ---
 
 <div align="center">
-  <sub>Built with ❤️ for agile engineers and product teams worldwide. Star ⭐ this repository if you find it helpful!</sub>
+  <sub>Built with ❤️ from scratch for the community by <a href="https://iliassami.com"><b>Ilias Sami</b></a>. Star ⭐ this repository if you find it helpful!</sub>
 </div>

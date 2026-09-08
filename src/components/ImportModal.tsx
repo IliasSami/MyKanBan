@@ -719,7 +719,7 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
 
         {/* Modal Footer */}
         <div className="flex items-center justify-between px-5 py-3.5 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50/70 dark:bg-zinc-900/40">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
             <label className="flex items-center gap-1.5 text-xs text-zinc-600 dark:text-zinc-400 cursor-pointer select-none">
               <input
                 type="checkbox"
@@ -729,6 +729,18 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
               />
               <span>Replace current board (uncheck to append)</span>
             </label>
+            <span className="hidden sm:inline text-zinc-300 dark:text-zinc-700">•</span>
+            <span className="text-[11px] text-zinc-500 dark:text-zinc-400">
+              Built by{' '}
+              <a
+                href="https://iliassami.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-zinc-700 dark:text-zinc-300 hover:text-blue-600 dark:hover:text-blue-400 underline decoration-zinc-300 dark:decoration-zinc-700 underline-offset-2 transition"
+              >
+                Ilias Sami
+              </a>
+            </span>
           </div>
 
           <div className="flex items-center gap-2.5">

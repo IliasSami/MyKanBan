@@ -195,12 +195,23 @@ export const AccessibilityMenu: React.FC<AccessibilityMenuProps> = ({ isOpen, on
           </div>
         </div>
 
-        {/* Done Button */}
-        <div className="mt-5 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex justify-end">
+        {/* Footer & Attribution */}
+        <div className="mt-5 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
+          <span className="text-[11px] text-zinc-500 dark:text-zinc-400">
+            Built by{' '}
+            <a
+              href="https://iliassami.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-zinc-800 dark:text-zinc-200 font-medium hover:text-blue-600 dark:hover:text-blue-400 underline decoration-zinc-300 dark:decoration-zinc-700 underline-offset-2 transition"
+            >
+              Ilias Sami
+            </a>
+          </span>
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-1.5 text-xs font-medium rounded-lg bg-blue-600 hover:bg-blue-500 text-white transition focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:outline-none"
+            className="px-4 py-1.5 text-xs font-medium rounded-lg bg-blue-600 hover:bg-blue-500 text-white transition focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:outline-none cursor-pointer"
           >
             Apply & Close
           </button>

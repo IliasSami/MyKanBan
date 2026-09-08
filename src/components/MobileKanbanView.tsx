@@ -253,6 +253,33 @@ export const MobileKanbanView: React.FC<MobileKanbanViewProps> = ({
             </p>
           </div>
         )}
+
+        {/* Mobile Community Attribution Note */}
+        <div className="pt-8 pb-4 text-center text-xs text-zinc-400 dark:text-zinc-500">
+          <p>
+            Built from scratch for the community by{' '}
+            <a
+              href="https://iliassami.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-zinc-700 dark:text-zinc-300 font-semibold underline decoration-zinc-300 dark:decoration-zinc-700 underline-offset-2"
+            >
+              Ilias Sami
+            </a>
+          </p>
+          <div className="mt-1 flex items-center justify-center gap-2">
+            <a
+              href="https://iliassami.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 dark:text-blue-400 font-medium hover:underline"
+            >
+              iliassami.com ↗
+            </a>
+            <span>•</span>
+            <span className="text-emerald-600 dark:text-emerald-400">100% Free & Open-Source</span>
+          </div>
+        </div>
       </div>
 
       {/* Google Keep style Floating Action Button (FAB) */}

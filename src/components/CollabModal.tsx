@@ -352,13 +352,36 @@ export const CollabModal: React.FC<CollabModalProps> = ({
               <div className="pt-2">
                 <button
                   type="submit"
-                  className="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded transition focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:outline-none"
+                  className="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded transition focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:outline-none cursor-pointer"
                 >
                   Save Profile
                 </button>
               </div>
             </form>
           )}
+        </div>
+
+        {/* Footer & Attribution */}
+        <div className="px-5 py-2.5 bg-zinc-50 dark:bg-zinc-900/60 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-between text-[11px] text-zinc-500 dark:text-zinc-400">
+          <span>
+            Built from scratch for the community by{' '}
+            <a
+              href="https://iliassami.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-zinc-800 dark:text-zinc-200 font-semibold hover:text-blue-600 dark:hover:text-blue-400 underline decoration-zinc-300 dark:decoration-zinc-700 underline-offset-2 transition"
+            >
+              Ilias Sami
+            </a>
+          </span>
+          <a
+            href="https://iliassami.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-zinc-700 dark:hover:text-zinc-300 transition"
+          >
+            iliassami.com ↗
+          </a>
         </div>
       </div>
     </div>

@@ -64,6 +64,15 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span className="text-[10px] uppercase font-mono font-medium px-1.5 py-0.2 rounded bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">
                 Scrum
               </span>
+              <a
+                href="https://iliassami.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Built from scratch for the community by Ilias Sami (iliassami.com)"
+                className="hidden md:inline-flex items-center text-[11px] text-zinc-500 hover:text-blue-600 dark:text-zinc-400 dark:hover:text-blue-400 transition"
+              >
+                <span>• by <strong className="font-semibold underline decoration-zinc-300 dark:decoration-zinc-700 underline-offset-2">Ilias Sami</strong></span>
+              </a>
             </div>
             <p className="text-xs text-zinc-500 dark:text-zinc-400 font-normal truncate max-w-xs md:max-w-md">
               {boardTitle || project.title}

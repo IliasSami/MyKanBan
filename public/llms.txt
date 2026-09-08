@@ -4,6 +4,8 @@
 
 - **Live Production App**: https://mykanban.pages.dev
 - **GitHub Repository**: https://github.com/IliasSami/MyKanBan
+- **Author & Creator**: Built from scratch for the community by [Ilias Sami](https://iliassami.com)
+- **Official Website**: https://iliassami.com
 - **License**: MIT (100% Free & Open-Source)
 - **Tech Stack**: React 19, TypeScript, Vite, Tailwind CSS v4, @dnd-kit, Cloudflare Pages
 
