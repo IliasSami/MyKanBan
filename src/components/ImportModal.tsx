@@ -4,7 +4,6 @@ import {
   FileText,
   Upload,
   Sparkles,
-  Info,
   CheckCircle2,
   FileUp,
 } from 'lucide-react';
@@ -24,18 +23,18 @@ const SAMPLE_MARKDOWN = `# Sprint 25: AI Workflow Engine
 ## Backlog
 - [ ] Research WebAssembly parsing pipelines @Alex #high ~5
 - [ ] Investigate Redis cache for Edge Workers #low ~2
-- [ ] User story: Team member permission roles #medium ~3
+- [ ] Team member permission roles architecture #medium ~3
 
 ## Sprint To-Do
-- [ ] Set up Cloudflare D1 local database migrations @David #high ~5
+- [ ] Configure Cloudflare D1 local database migrations @David #high ~5
 - [ ] Build drag-and-drop card preview @Sarah #urgent ~3
   - Include ghost placeholder
   - Test on mobile touch devices
-- [ ] Create Collab Code join dialog @Alex #high ~3
+- [ ] Implement Collab Code join dialog @Alex #high ~3
 
 ## In Progress
 - [ ] Ingest structured Markdown files with tag extraction @Alex #urgent ~5
-  > Parser supports @assignee, #priority, and ~storypoints.
+  > Parser automatically strips markdown special characters and extracts metadata.
   - [x] Header parsing logic
   - [x] Checkbox bullet parsing
   - [ ] Live visual preview modal
@@ -44,8 +43,8 @@ const SAMPLE_MARKDOWN = `# Sprint 25: AI Workflow Engine
 - [ ] Review PR #42: Realtime WebSocket synchronization @Sarah #urgent ~3
 
 ## Done
-- [x] Initial React SPA Vite setup @Alex #medium ~2
-- [x] Tailwind CSS v4 styling configuration #medium ~1
+- [x] React SPA Vite setup @Alex #medium ~2
+- [x] Minimal two-color design system configuration #medium ~1
 `;
 
 const SAMPLE_CSV = `Title,Column,Assignee,Priority,Story Points,Tags,Description
@@ -103,7 +102,7 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
       const content = e.target?.result as string;
       if (content) {
         setTextContent(content);
-        setActiveTab('paste'); // switch to preview
+        setActiveTab('paste');
       }
     };
     reader.readAsText(file);
@@ -124,66 +123,61 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-150">
-      <div className="bg-slate-900 border border-slate-700/80 rounded-2xl w-full max-w-4xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150">
+      <div className="bg-zinc-950 border border-zinc-800 rounded-xl w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/80">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
-              <Upload className="w-5 h-5" />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                Convert Data to Kanban Board
-                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
-                  Scrum Engine
-                </span>
-              </h2>
-              <p className="text-xs text-slate-400">
-                Transform raw Markdown or CSV data into an interactive, organized task board.
-              </p>
-            </div>
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-zinc-800 bg-zinc-950">
+          <div>
+            <h2 className="text-sm font-semibold text-zinc-100 flex items-center gap-2">
+              Import Board Data
+              <span className="text-[10px] font-mono font-medium px-1.5 py-0.2 rounded bg-zinc-900 text-zinc-400 border border-zinc-800">
+                MD / CSV
+              </span>
+            </h2>
+            <p className="text-xs text-zinc-400 mt-0.5">
+              Transform Markdown or CSV into a visual Scrum Kanban board.
+            </p>
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition"
+            className="text-zinc-500 hover:text-zinc-200 p-1 rounded hover:bg-zinc-900 transition"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Content Body */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-5">
-          {/* Tab Navigation & Presets */}
-          <div className="flex flex-wrap items-center justify-between gap-3 pb-2 border-b border-slate-800">
-            <div className="flex items-center gap-2 bg-slate-800/80 p-1 rounded-xl border border-slate-700/60 text-xs">
+        <div className="flex-1 overflow-y-auto p-5 space-y-4">
+          {/* Tabs */}
+          <div className="flex flex-wrap items-center justify-between gap-3 pb-2 border-b border-zinc-800/80">
+            <div className="flex items-center gap-1 bg-zinc-900 p-1 rounded-lg border border-zinc-800 text-xs">
               <button
                 onClick={() => setActiveTab('paste')}
-                className={`px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 ${
+                className={`px-3 py-1 rounded font-medium transition flex items-center gap-1.5 ${
                   activeTab === 'paste'
-                    ? 'bg-indigo-600 text-white shadow'
-                    : 'text-slate-400 hover:text-slate-200'
+                    ? 'bg-zinc-800 text-zinc-100'
+                    : 'text-zinc-400 hover:text-zinc-200'
                 }`}
               >
                 <FileText className="w-3.5 h-3.5" />
-                Paste Code / Text
+                Text Editor
               </button>
               <button
                 onClick={() => setActiveTab('upload')}
-                className={`px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 ${
+                className={`px-3 py-1 rounded font-medium transition flex items-center gap-1.5 ${
                   activeTab === 'upload'
-                    ? 'bg-indigo-600 text-white shadow'
-                    : 'text-slate-400 hover:text-slate-200'
+                    ? 'bg-zinc-800 text-zinc-100'
+                    : 'text-zinc-400 hover:text-zinc-200'
                 }`}
               >
                 <FileUp className="w-3.5 h-3.5" />
-                Upload File (.md, .csv)
+                Upload File
               </button>
             </div>
 
-            {/* Quick Sample Fillers */}
-            <div className="flex items-center gap-2 text-xs">
-              <span className="text-slate-500 font-medium text-[11px]">Load Sample:</span>
+            {/* Presets */}
+            <div className="flex items-center gap-2 text-xs font-mono">
+              <span className="text-zinc-500 text-[11px]">Sample:</span>
               <button
                 type="button"
                 onClick={() => {
@@ -191,9 +185,9 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
                   setTextContent(SAMPLE_MARKDOWN);
                   setActiveTab('paste');
                 }}
-                className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition"
+                className="px-2 py-0.5 rounded bg-zinc-900 hover:bg-zinc-850 text-zinc-300 border border-zinc-800 transition"
               >
-                Scrum Markdown
+                Scrum.md
               </button>
               <button
                 type="button"
@@ -202,15 +196,15 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
                   setTextContent(SAMPLE_CSV);
                   setActiveTab('paste');
                 }}
-                className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition"
+                className="px-2 py-0.5 rounded bg-zinc-900 hover:bg-zinc-850 text-zinc-300 border border-zinc-800 transition"
               >
-                CSV Table
+                Tasks.csv
               </button>
             </div>
           </div>
 
           {activeTab === 'upload' ? (
-            /* File Dropzone */
+            /* Dropzone */
             <div
               onDragOver={(e) => {
                 e.preventDefault();
@@ -218,10 +212,10 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
               }}
               onDragLeave={() => setDragOver(false)}
               onDrop={handleDrop}
-              className={`border-2 border-dashed rounded-2xl p-12 text-center transition flex flex-col items-center justify-center gap-3 cursor-pointer ${
+              className={`border border-dashed rounded-xl p-10 text-center transition flex flex-col items-center justify-center gap-2.5 cursor-pointer ${
                 dragOver
-                  ? 'border-indigo-500 bg-indigo-500/10'
-                  : 'border-slate-700 bg-slate-800/30 hover:bg-slate-800/60'
+                  ? 'border-blue-500 bg-blue-500/5'
+                  : 'border-zinc-800 bg-zinc-900/30 hover:bg-zinc-900/60'
               }`}
               onClick={() => document.getElementById('file-upload-input')?.click()}
             >
@@ -234,116 +228,96 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
                   if (e.target.files?.[0]) handleFileUpload(e.target.files[0]);
                 }}
               />
-              <div className="p-4 rounded-full bg-slate-800 text-indigo-400 border border-slate-700">
-                <Upload className="w-8 h-8" />
+              <div className="p-3 rounded-lg bg-zinc-900 text-zinc-400 border border-zinc-800">
+                <Upload className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-slate-200">
-                  Click to select or drag and drop your file here
+                <p className="text-xs font-medium text-zinc-200">
+                  Select or drag a file here
                 </p>
-                <p className="text-xs text-slate-500 mt-1">
-                  Supports Markdown (.md) or CSV (.csv) files
+                <p className="text-[11px] text-zinc-500 mt-0.5">
+                  Markdown (.md) or CSV (.csv)
                 </p>
               </div>
               {fileName && (
-                <div className="text-xs text-indigo-400 font-mono bg-indigo-950/60 px-3 py-1 rounded-full border border-indigo-800">
-                  Loaded: {fileName}
+                <div className="text-xs text-zinc-300 font-mono bg-zinc-900 px-2.5 py-0.5 rounded border border-zinc-800">
+                  {fileName}
                 </div>
               )}
             </div>
           ) : (
-            /* Direct Text Area */
-            <div className="space-y-3">
+            /* Text Area */
+            <div className="space-y-2">
               <div className="flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2">
-                  <span className="text-slate-400 font-medium">Format:</span>
-                  <label className="flex items-center gap-1 cursor-pointer">
+                <div className="flex items-center gap-3">
+                  <span className="text-zinc-500">Format:</span>
+                  <label className="flex items-center gap-1.5 cursor-pointer text-zinc-300">
                     <input
                       type="radio"
                       name="format"
                       checked={format === 'markdown'}
                       onChange={() => setFormat('markdown')}
-                      className="accent-indigo-500"
+                      className="accent-blue-600"
                     />
-                    <span className="text-slate-300">Markdown (.md)</span>
+                    <span>Markdown</span>
                   </label>
-                  <label className="flex items-center gap-1 cursor-pointer">
+                  <label className="flex items-center gap-1.5 cursor-pointer text-zinc-300">
                     <input
                       type="radio"
                       name="format"
                       checked={format === 'csv'}
                       onChange={() => setFormat('csv')}
-                      className="accent-indigo-500"
+                      className="accent-blue-600"
                     />
-                    <span className="text-slate-300">CSV Table</span>
+                    <span>CSV</span>
                   </label>
                 </div>
 
-                <div className="text-slate-500 text-[11px] flex items-center gap-1">
-                  <Info className="w-3.5 h-3.5" />
-                  <span>Supports @assignee, #priority, ~points in markdown</span>
-                </div>
+                <span className="text-zinc-500 text-[11px] font-mono">
+                  Supports @assignee, #priority, ~sp
+                </span>
               </div>
 
               <textarea
                 value={textContent}
                 onChange={(e) => setTextContent(e.target.value)}
-                placeholder={
-                  format === 'markdown'
-                    ? '## Column Name\n- [ ] Task Title @assignee #urgent ~5'
-                    : 'Title,Column,Assignee,Priority,Points'
-                }
-                rows={10}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 font-mono text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition resize-y leading-relaxed"
+                placeholder="Paste Markdown or CSV..."
+                rows={9}
+                className="w-full bg-zinc-900 border border-zinc-800 rounded-lg p-3 font-mono text-xs text-zinc-200 focus:outline-none focus:border-blue-500 transition resize-y leading-relaxed"
               />
             </div>
           )}
 
-          {/* Live Ingestion Preview Section */}
+          {/* Clean Ingestion Preview */}
           {parseResult && (
-            <div className="bg-slate-800/60 border border-slate-700/80 rounded-2xl p-4 space-y-3">
-              <div className="flex items-center justify-between border-b border-slate-700/60 pb-2">
+            <div className="bg-zinc-900/60 border border-zinc-800 rounded-lg p-3.5 space-y-2.5">
+              <div className="flex items-center justify-between border-b border-zinc-800/80 pb-2">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-cyan-400" />
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-200">
-                    Live Board Preview
-                  </span>
-                  <span className="text-xs text-indigo-400 font-semibold font-mono">
-                    "{parseResult.title}"
+                  <Sparkles className="w-3.5 h-3.5 text-blue-400" />
+                  <span className="text-xs font-semibold text-zinc-200">
+                    {parseResult.title}
                   </span>
                 </div>
 
-                <div className="flex items-center gap-3 text-xs font-medium">
-                  <span className="text-slate-400">
-                    Columns: <strong className="text-white">{parseResult.columns.length}</strong>
-                  </span>
-                  <span className="text-slate-400">
-                    Tasks: <strong className="text-white">{totalTasks}</strong>
-                  </span>
-                  <span className="text-slate-400">
-                    Story Points: <strong className="text-cyan-300 font-mono">{totalPoints}</strong>
-                  </span>
+                <div className="flex items-center gap-3 font-mono text-[11px] text-zinc-400">
+                  <span>Columns: <strong className="text-zinc-200">{parseResult.columns.length}</strong></span>
+                  <span>Tasks: <strong className="text-zinc-200">{totalTasks}</strong></span>
+                  <span>Points: <strong className="text-zinc-200">{totalPoints} sp</strong></span>
                 </div>
               </div>
 
-              {/* Column Lanes Pill Breakdown */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 pt-1">
+              {/* Column Lanes Preview */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
                 {parseResult.columns.map((col, idx) => (
                   <div
                     key={idx}
-                    className="bg-slate-900/80 border border-slate-700/60 rounded-xl p-2.5 text-xs flex flex-col justify-between"
+                    className="bg-zinc-950 border border-zinc-800 rounded p-2 text-xs"
                   >
-                    <div className="flex items-center justify-between font-semibold text-slate-200 mb-1">
+                    <div className="flex items-center justify-between font-medium text-zinc-300">
                       <span className="truncate">{col.title}</span>
-                      <span className="px-1.5 py-0.5 rounded-full bg-slate-800 text-[10px] font-mono text-slate-400">
+                      <span className="font-mono text-[10px] text-zinc-500">
                         {col.tasks.length}
                       </span>
-                    </div>
-
-                    <div className="text-[11px] text-slate-500 line-clamp-1">
-                      {col.tasks.length > 0
-                        ? `${col.tasks[0].title}`
-                        : '(Empty column)'}
                     </div>
                   </div>
                 ))}
@@ -351,38 +325,38 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
             </div>
           )}
 
-          {/* Import Mode Options */}
-          <div className="flex items-center gap-6 pt-2 text-xs">
-            <span className="text-slate-400 font-medium">Import Mode:</span>
-            <label className="flex items-center gap-2 cursor-pointer text-slate-300">
+          {/* Import Mode */}
+          <div className="flex items-center gap-4 text-xs pt-1">
+            <span className="text-zinc-500">Mode:</span>
+            <label className="flex items-center gap-1.5 cursor-pointer text-zinc-300">
               <input
                 type="radio"
                 name="replaceMode"
                 checked={replaceExisting}
                 onChange={() => setReplaceExisting(true)}
-                className="accent-indigo-500"
+                className="accent-blue-600"
               />
-              <span>Replace current board completely</span>
+              <span>Replace current board</span>
             </label>
-            <label className="flex items-center gap-2 cursor-pointer text-slate-300">
+            <label className="flex items-center gap-1.5 cursor-pointer text-zinc-300">
               <input
                 type="radio"
                 name="replaceMode"
                 checked={!replaceExisting}
                 onChange={() => setReplaceExisting(false)}
-                className="accent-indigo-500"
+                className="accent-blue-600"
               />
-              <span>Append to current board</span>
+              <span>Append tasks</span>
             </label>
           </div>
         </div>
 
-        {/* Footer Actions */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-slate-800 bg-slate-900/90">
+        {/* Footer */}
+        <div className="flex items-center justify-between px-5 py-3 border-t border-zinc-800 bg-zinc-950">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition"
+            className="px-3 py-1.5 text-xs text-zinc-400 hover:text-zinc-200 rounded"
           >
             Cancel
           </button>
@@ -391,10 +365,10 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
             type="button"
             onClick={handleConfirmImport}
             disabled={!parseResult || totalTasks === 0}
-            className="flex items-center gap-2 px-5 py-2.5 text-xs font-bold text-white bg-gradient-to-r from-indigo-600 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 rounded-xl shadow-lg shadow-indigo-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition"
+            className="flex items-center gap-1.5 px-4 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-500 rounded transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <CheckCircle2 className="w-4 h-4" />
-            <span>Generate Kanban Board ({totalTasks} Tasks)</span>
+            <CheckCircle2 className="w-3.5 h-3.5" />
+            <span>Import ({totalTasks} Tasks)</span>
           </button>
         </div>
       </div>

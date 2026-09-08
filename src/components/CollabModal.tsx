@@ -1,16 +1,13 @@
 import React, { useState } from 'react';
 import {
   X,
-  Share2,
   Copy,
   Check,
   Plus,
   Radio,
   FolderKanban,
-  Sparkles,
   ArrowRight,
-  ShieldCheck,
-  Palette
+  User,
 } from 'lucide-react';
 import type { Project, UserProfile } from '../types/kanban';
 
@@ -25,16 +22,6 @@ interface CollabModalProps {
   onCreateProject: (title: string, description?: string) => void;
   onSelectProject: (projectId: string) => void;
 }
-
-const AVATAR_COLORS = [
-  '#6366f1', // Indigo
-  '#06b6d4', // Cyan
-  '#10b981', // Emerald
-  '#f59e0b', // Amber
-  '#ec4899', // Pink
-  '#8b5cf6', // Violet
-  '#ef4444', // Red
-];
 
 export const CollabModal: React.FC<CollabModalProps> = ({
   isOpen,
@@ -53,9 +40,7 @@ export const CollabModal: React.FC<CollabModalProps> = ({
   const [newProjTitle, setNewProjTitle] = useState('');
   const [copied, setCopied] = useState(false);
 
-  // Profile form state
   const [name, setName] = useState(user.name);
-  const [avatarColor, setAvatarColor] = useState(user.avatarColor);
 
   if (!isOpen) return null;
 
@@ -69,7 +54,7 @@ export const CollabModal: React.FC<CollabModalProps> = ({
     e.preventDefault();
     setJoinError('');
     if (!joinCodeInput.trim()) {
-      setJoinError('Please enter a collab code.');
+      setJoinError('Please enter a room code.');
       return;
     }
 
@@ -78,7 +63,7 @@ export const CollabModal: React.FC<CollabModalProps> = ({
       setJoinCodeInput('');
       onClose();
     } else {
-      setJoinError('Invalid collab code. Please check and try again.');
+      setJoinError('Invalid room code. Please check and try again.');
     }
   };
 
@@ -101,182 +86,167 @@ export const CollabModal: React.FC<CollabModalProps> = ({
 
     onUpdateUser({
       name: name.trim() || 'Collaborator',
-      avatarColor,
       initials: initials || 'U',
     });
     onClose();
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-150">
-      <div className="bg-slate-900 border border-slate-700/90 rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150">
+      <div className="bg-zinc-950 border border-zinc-800 rounded-xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/90">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
-              <Share2 className="w-5 h-5" />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-white">Collaboration & Projects</h2>
-              <p className="text-xs text-slate-400">
-                Share invite codes, join teammate boards, or customize your user identity.
-              </p>
-            </div>
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-zinc-800 bg-zinc-950">
+          <div>
+            <h2 className="text-sm font-semibold text-zinc-100">Collaboration & Workspace</h2>
+            <p className="text-xs text-zinc-400 mt-0.5">
+              Share room code, switch boards, or configure your identity.
+            </p>
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition"
+            className="text-zinc-500 hover:text-zinc-200 p-1 rounded hover:bg-zinc-900 transition"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Tab switcher */}
-        <div className="flex items-center px-6 pt-3 border-b border-slate-800 gap-4 text-xs font-semibold">
+        {/* Minimal Tab Switcher */}
+        <div className="flex items-center px-5 pt-2 border-b border-zinc-800 gap-4 text-xs font-medium">
           <button
             onClick={() => setActiveTab('collab')}
-            className={`pb-3 transition relative flex items-center gap-1.5 ${
+            className={`pb-2.5 transition relative flex items-center gap-1.5 ${
               activeTab === 'collab'
-                ? 'text-indigo-400 border-b-2 border-indigo-500 font-bold'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'text-blue-400 border-b border-blue-500 font-semibold'
+                : 'text-zinc-400 hover:text-zinc-200'
             }`}
           >
             <Radio className="w-3.5 h-3.5" />
-            <span>Collab Codes</span>
+            <span>Room Code</span>
           </button>
           <button
             onClick={() => setActiveTab('projects')}
-            className={`pb-3 transition relative flex items-center gap-1.5 ${
+            className={`pb-2.5 transition relative flex items-center gap-1.5 ${
               activeTab === 'projects'
-                ? 'text-indigo-400 border-b-2 border-indigo-500 font-bold'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'text-blue-400 border-b border-blue-500 font-semibold'
+                : 'text-zinc-400 hover:text-zinc-200'
             }`}
           >
             <FolderKanban className="w-3.5 h-3.5" />
-            <span>Switch / New Board ({projects.length})</span>
+            <span>Boards ({projects.length})</span>
           </button>
           <button
             onClick={() => setActiveTab('profile')}
-            className={`pb-3 transition relative flex items-center gap-1.5 ${
+            className={`pb-2.5 transition relative flex items-center gap-1.5 ${
               activeTab === 'profile'
-                ? 'text-indigo-400 border-b-2 border-indigo-500 font-bold'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'text-blue-400 border-b border-blue-500 font-semibold'
+                : 'text-zinc-400 hover:text-zinc-200'
             }`}
           >
-            <ShieldCheck className="w-3.5 h-3.5" />
-            <span>Identity & Login</span>
+            <User className="w-3.5 h-3.5" />
+            <span>Profile</span>
           </button>
         </div>
 
-        {/* Modal Body */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-5 text-xs">
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto p-5 space-y-4 text-xs">
           {activeTab === 'collab' && (
-            <div className="space-y-6">
-              {/* Current Board Share Card */}
-              <div className="bg-gradient-to-br from-slate-800 to-indigo-950/40 border border-indigo-500/30 rounded-2xl p-5 shadow-lg">
+            <div className="space-y-4">
+              {/* Active Room Code Card */}
+              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5" /> Current Board Collab Code
+                  <span className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider">
+                    Active Board Code
                   </span>
-                  <span className="text-[11px] text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded-full border border-emerald-500/30 flex items-center gap-1 font-semibold">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-                    Live Sync Active
+                  <span className="text-[10px] font-mono text-zinc-400 bg-zinc-950 px-2 py-0.5 rounded border border-zinc-800 flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                    Live Sync Ready
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between gap-3 bg-slate-900/90 border border-slate-700/80 rounded-xl p-3 mt-3">
-                  <div>
-                    <span className="block text-[10px] text-slate-500 font-medium">Invite Code</span>
-                    <span className="font-mono text-xl font-black text-indigo-300 tracking-wider">
-                      {currentProject.collabCode}
-                    </span>
-                  </div>
+                <div className="flex items-center justify-between gap-3 bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 mt-2">
+                  <code className="font-mono text-lg font-bold text-zinc-100 tracking-wider">
+                    {currentProject.collabCode}
+                  </code>
 
                   <button
                     onClick={handleCopyCode}
-                    className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl shadow transition"
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-500 rounded transition"
                   >
                     {copied ? (
                       <>
-                        <Check className="w-4 h-4 text-emerald-300" />
-                        <span>Copied!</span>
+                        <Check className="w-3.5 h-3.5" />
+                        <span>Copied</span>
                       </>
                     ) : (
                       <>
-                        <Copy className="w-4 h-4" />
+                        <Copy className="w-3.5 h-3.5" />
                         <span>Copy Code</span>
                       </>
                     )}
                   </button>
                 </div>
 
-                <p className="text-[11px] text-slate-400 mt-3 leading-relaxed">
-                  Send this 6-character code to your teammates. When they enter it in MyKanBan, they'll immediately sync to your board in real time.
+                <p className="text-[11px] text-zinc-400 mt-2.5 leading-relaxed">
+                  Share this code with teammates. When entered into MyKanBan, their board immediately synchronizes with yours.
                 </p>
               </div>
 
-              {/* Join Board with Code */}
-              <div className="bg-slate-800/60 border border-slate-700/80 rounded-2xl p-5 space-y-3">
-                <h3 className="font-bold text-sm text-slate-200 flex items-center gap-2">
-                  <Radio className="w-4 h-4 text-cyan-400" />
-                  Join Another Board
+              {/* Join Board */}
+              <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-4 space-y-2.5">
+                <h3 className="font-medium text-xs text-zinc-200">
+                  Connect to Existing Board
                 </h3>
-                <p className="text-slate-400 text-xs">
-                  Enter a teammate's Collab Code (e.g., <code className="text-indigo-300">KAN-842</code>) to connect to their Kanban board.
-                </p>
-
-                <form onSubmit={handleJoin} className="flex gap-2 pt-1">
+                <form onSubmit={handleJoin} className="flex gap-2">
                   <input
                     type="text"
                     value={joinCodeInput}
                     onChange={(e) => setJoinCodeInput(e.target.value.toUpperCase())}
-                    placeholder="Enter Collab Code..."
+                    placeholder="e.g. KAN-842"
                     maxLength={10}
-                    className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 font-mono text-sm uppercase text-white focus:outline-none focus:border-cyan-400 tracking-wider"
+                    className="flex-1 bg-zinc-950 border border-zinc-800 rounded px-3 py-1.5 font-mono text-xs uppercase text-zinc-100 focus:outline-none focus:border-blue-500"
                   />
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white font-bold rounded-xl flex items-center gap-1.5 transition shadow"
+                    className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 font-medium rounded transition border border-zinc-700 flex items-center gap-1"
                   >
-                    <span>Connect</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
+                    <span>Join</span>
+                    <ArrowRight className="w-3 h-3 text-zinc-400" />
                   </button>
                 </form>
-                {joinError && <p className="text-rose-400 text-xs font-semibold">{joinError}</p>}
+                {joinError && <p className="text-zinc-300 text-[11px] font-mono">{joinError}</p>}
               </div>
             </div>
           )}
 
           {activeTab === 'projects' && (
-            <div className="space-y-5">
-              {/* Create New Project Form */}
-              <form onSubmit={handleCreateNewProject} className="bg-slate-800/60 border border-slate-700/80 rounded-2xl p-4 space-y-3">
-                <h3 className="font-bold text-sm text-slate-200 flex items-center gap-2">
-                  <Plus className="w-4 h-4 text-indigo-400" />
-                  Create New Kanban Board
+            <div className="space-y-4">
+              {/* New Project Form */}
+              <form onSubmit={handleCreateNewProject} className="bg-zinc-900 border border-zinc-800 rounded-xl p-3.5 space-y-2">
+                <h3 className="font-medium text-xs text-zinc-200 flex items-center gap-1.5">
+                  <Plus className="w-3.5 h-3.5 text-zinc-400" />
+                  Create New Board
                 </h3>
                 <div className="flex gap-2">
                   <input
                     type="text"
                     value={newProjTitle}
                     onChange={(e) => setNewProjTitle(e.target.value)}
-                    placeholder="e.g. Sprint 26: Mobile Redesign..."
-                    className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                    placeholder="Board name..."
+                    className="flex-1 bg-zinc-950 border border-zinc-800 rounded px-2.5 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-blue-500"
                   />
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition shadow flex items-center gap-1"
+                    className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded transition"
                   >
-                    <Plus className="w-3.5 h-3.5" />
                     Create
                   </button>
                 </div>
               </form>
 
               {/* Projects List */}
-              <div className="space-y-2">
-                <span className="block text-slate-400 font-medium">Your Boards:</span>
-                <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+              <div className="space-y-1.5">
+                <span className="block text-zinc-500 text-[11px] font-mono">AVAILABLE BOARDS</span>
+                <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
                   {projects.map((proj) => (
                     <div
                       key={proj.id}
@@ -284,28 +254,28 @@ export const CollabModal: React.FC<CollabModalProps> = ({
                         onSelectProject(proj.id);
                         onClose();
                       }}
-                      className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition ${
+                      className={`flex items-center justify-between p-2.5 rounded-lg border cursor-pointer transition ${
                         proj.id === currentProject.id
-                          ? 'bg-indigo-950/40 border-indigo-500/60 shadow-md shadow-indigo-500/10'
-                          : 'bg-slate-800/40 border-slate-700/60 hover:bg-slate-800/80'
+                          ? 'bg-zinc-900 border-blue-500/80 text-zinc-100'
+                          : 'bg-zinc-950 border-zinc-850 hover:bg-zinc-900/60 text-zinc-300'
                       }`}
                     >
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
-                          <h4 className="font-semibold text-slate-100 truncate text-xs">
+                          <span className="font-medium text-xs truncate">
                             {proj.title}
-                          </h4>
+                          </span>
                           {proj.id === currentProject.id && (
-                            <span className="text-[10px] bg-indigo-500 text-white font-bold px-1.5 py-0.2 rounded-full">
+                            <span className="text-[10px] font-mono text-blue-400 bg-blue-500/10 px-1 py-0.2 rounded border border-blue-500/20">
                               Active
                             </span>
                           )}
                         </div>
-                        <span className="text-[11px] font-mono text-indigo-400 mt-0.5 block">
-                          Code: {proj.collabCode}
+                        <span className="text-[10px] font-mono text-zinc-500 block mt-0.5">
+                          {proj.collabCode}
                         </span>
                       </div>
-                      <ArrowRight className="w-4 h-4 text-slate-500" />
+                      <ArrowRight className="w-3.5 h-3.5 text-zinc-500" />
                     </div>
                   ))}
                 </div>
@@ -314,12 +284,9 @@ export const CollabModal: React.FC<CollabModalProps> = ({
           )}
 
           {activeTab === 'profile' && (
-            <form onSubmit={handleSaveProfile} className="space-y-5">
-              <div className="flex items-center gap-4 bg-slate-800/60 p-4 rounded-2xl border border-slate-700/80">
-                <div
-                  className="w-14 h-14 rounded-full flex items-center justify-center font-bold text-lg text-white shadow-lg ring-4 ring-slate-700/50"
-                  style={{ backgroundColor: avatarColor }}
-                >
+            <form onSubmit={handleSaveProfile} className="space-y-4">
+              <div className="flex items-center gap-3 bg-zinc-900 p-3 rounded-xl border border-zinc-800">
+                <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center font-mono font-bold text-sm text-zinc-200">
                   {name
                     .split(' ')
                     .map((n) => n[0])
@@ -328,48 +295,28 @@ export const CollabModal: React.FC<CollabModalProps> = ({
                     .slice(0, 2) || 'U'}
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-white">{name || 'Your Name'}</h4>
-                  <p className="text-xs text-slate-400">
-                    This avatar and name represent you on the Kanban board.
+                  <h4 className="text-xs font-semibold text-zinc-100">{name || 'User'}</h4>
+                  <p className="text-[11px] text-zinc-500">
+                    Displayed on assigned tasks and sprint history.
                   </p>
                 </div>
               </div>
 
               <div>
-                <label className="block text-slate-400 font-medium mb-1">Display Name</label>
+                <label className="block text-zinc-400 font-medium mb-1">Display Name</label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. Alex Rivera"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-zinc-900 border border-zinc-800 rounded px-3 py-2 text-xs text-zinc-100 focus:outline-none focus:border-blue-500"
                 />
               </div>
 
-              <div>
-                <label className="block text-slate-400 font-medium mb-2 flex items-center gap-1.5">
-                  <Palette className="w-3.5 h-3.5 text-indigo-400" />
-                  <span>Choose Avatar Color</span>
-                </label>
-                <div className="flex items-center gap-3">
-                  {AVATAR_COLORS.map((col) => (
-                    <button
-                      key={col}
-                      type="button"
-                      onClick={() => setAvatarColor(col)}
-                      className={`w-8 h-8 rounded-full transition-transform ${
-                        avatarColor === col ? 'scale-125 ring-2 ring-white shadow-lg' : 'hover:scale-110'
-                      }`}
-                      style={{ backgroundColor: col }}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              <div className="pt-3">
+              <div className="pt-2">
                 <button
                   type="submit"
-                  className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow transition"
+                  className="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded transition"
                 >
                   Save Profile
                 </button>

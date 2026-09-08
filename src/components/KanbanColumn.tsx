@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { Plus, MoreHorizontal, AlertCircle, Trash2, Edit2, Check } from 'lucide-react';
+import { Plus, MoreHorizontal, Trash2, Edit2, Check } from 'lucide-react';
 import type { Column, Task, Priority } from '../types/kanban';
 import { KanbanCard } from './KanbanCard';
 
@@ -76,17 +76,17 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
   return (
     <div
       ref={setNodeRef}
-      className={`flex flex-col w-80 min-w-[320px] max-w-[320px] bg-slate-900/70 border rounded-2xl p-3.5 transition-colors duration-200 max-h-[calc(100vh-140px)] ${
+      className={`flex flex-col w-72 min-w-[288px] max-w-[288px] bg-zinc-950 border rounded-xl p-3 transition-colors duration-150 max-h-[calc(100vh-125px)] ${
         isOver
-          ? 'border-indigo-500 bg-slate-800/80 shadow-indigo-500/10 shadow-xl'
-          : 'border-slate-800/90'
+          ? 'border-blue-500 bg-zinc-900/60'
+          : 'border-zinc-800/90'
       }`}
     >
       {/* Column Header */}
-      <div className="flex items-center justify-between gap-2 pb-3 mb-1 border-b border-slate-800/80">
+      <div className="flex items-center justify-between gap-2 pb-2.5 mb-1 border-b border-zinc-800/80">
         <div className="flex items-center gap-2 flex-1 min-w-0">
           {isEditingTitle ? (
-            <div className="flex items-center gap-1.5 flex-1">
+            <div className="flex items-center gap-1 flex-1">
               <input
                 type="text"
                 autoFocus
@@ -94,11 +94,11 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
                 onChange={(e) => setColumnTitle(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSaveTitle()}
                 onBlur={handleSaveTitle}
-                className="bg-slate-800 border border-indigo-500 rounded px-2 py-0.5 text-sm font-semibold text-white w-full outline-none"
+                className="bg-zinc-900 border border-blue-500 rounded px-2 py-0.5 text-xs font-medium text-zinc-100 w-full outline-none"
               />
               <button
                 onClick={handleSaveTitle}
-                className="text-emerald-400 hover:text-emerald-300 p-1 rounded hover:bg-slate-800"
+                className="text-blue-400 p-0.5 rounded hover:bg-zinc-900"
               >
                 <Check className="w-3.5 h-3.5" />
               </button>
@@ -107,19 +107,19 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
             <h2
               onClick={() => setIsEditingTitle(true)}
               title="Click to rename"
-              className="text-sm font-bold text-slate-200 truncate cursor-pointer hover:text-indigo-400 transition"
+              className="text-xs font-semibold text-zinc-200 truncate cursor-pointer hover:text-blue-400 transition"
             >
               {column.title}
             </h2>
           )}
 
-          {/* Task count & story points badges */}
-          <div className="flex items-center gap-1">
+          {/* Counts */}
+          <div className="flex items-center gap-1 font-mono text-[11px]">
             <span
-              className={`text-xs px-2 py-0.5 rounded-full font-bold font-mono ${
+              className={`px-1.5 py-0.2 rounded font-medium ${
                 isWipExceeded
-                  ? 'bg-rose-500/20 text-rose-400 border border-rose-500/40'
-                  : 'bg-slate-800 text-slate-400 border border-slate-700/50'
+                  ? 'bg-zinc-800 text-zinc-100 border border-blue-500'
+                  : 'bg-zinc-900 text-zinc-400 border border-zinc-800'
               }`}
             >
               {tasks.length}
@@ -127,10 +127,7 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
             </span>
 
             {columnPoints > 0 && (
-              <span
-                title="Total Story Points"
-                className="text-[11px] px-1.5 py-0.5 rounded-full font-mono bg-indigo-950/60 text-indigo-300 border border-indigo-800/40"
-              >
+              <span className="text-zinc-500 text-[10px]">
                 {columnPoints}sp
               </span>
             )}
@@ -141,14 +138,14 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
         <div className="relative">
           <button
             onClick={() => setShowColMenu(!showColMenu)}
-            className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition"
+            className="text-zinc-500 hover:text-zinc-300 p-1 rounded hover:bg-zinc-900 transition"
           >
-            <MoreHorizontal className="w-4 h-4" />
+            <MoreHorizontal className="w-3.5 h-3.5" />
           </button>
 
           {showColMenu && (
             <div
-              className="absolute right-0 mt-1 w-44 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl py-1 z-50 text-xs"
+              className="absolute right-0 mt-1 w-40 bg-zinc-900 border border-zinc-800 rounded-lg shadow-xl py-1 z-50 text-xs"
               onMouseLeave={() => setShowColMenu(false)}
             >
               <button
@@ -156,10 +153,10 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
                   setIsEditingTitle(true);
                   setShowColMenu(false);
                 }}
-                className="w-full text-left px-3 py-2 flex items-center gap-2 hover:bg-slate-700 text-slate-200"
+                className="w-full text-left px-3 py-1.5 flex items-center gap-2 hover:bg-zinc-800 text-zinc-200"
               >
-                <Edit2 className="w-3.5 h-3.5 text-indigo-400" />
-                Rename Column
+                <Edit2 className="w-3.5 h-3.5 text-zinc-400" />
+                Rename
               </button>
               <button
                 onClick={() => {
@@ -168,10 +165,10 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
                   }
                   setShowColMenu(false);
                 }}
-                className="w-full text-left px-3 py-2 flex items-center gap-2 hover:bg-rose-950/40 text-rose-400"
+                className="w-full text-left px-3 py-1.5 flex items-center gap-2 hover:bg-zinc-800 text-zinc-300"
               >
-                <Trash2 className="w-3.5 h-3.5" />
-                Delete Column
+                <Trash2 className="w-3.5 h-3.5 text-zinc-500" />
+                Delete
               </button>
             </div>
           )}
@@ -180,14 +177,13 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
 
       {/* WIP Limit warning */}
       {isWipExceeded && (
-        <div className="flex items-center gap-1.5 text-[11px] text-rose-400 bg-rose-500/10 border border-rose-500/20 px-2 py-1 rounded-lg mb-2">
-          <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
-          <span>WIP limit exceeded! ({tasks.length}/{column.wipLimit})</span>
+        <div className="text-[10px] font-mono text-zinc-300 bg-zinc-900 border border-zinc-700 px-2 py-0.5 rounded mb-2">
+          WIP limit exceeded ({tasks.length}/{column.wipLimit})
         </div>
       )}
 
-      {/* Tasks List */}
-      <div className="flex-1 overflow-y-auto pr-1 -mr-1 space-y-2 min-h-[120px]">
+      {/* Task Cards List */}
+      <div className="flex-1 overflow-y-auto pr-1 -mr-1 space-y-1.5 min-h-[100px]">
         <SortableContext items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
           {tasks.map((task) => (
             <KanbanCard
@@ -200,24 +196,23 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
         </SortableContext>
 
         {tasks.length === 0 && !isAdding && (
-          <div className="h-28 border border-dashed border-slate-800 rounded-xl flex flex-col items-center justify-center text-slate-500 text-xs text-center p-4">
-            <span>Empty Column</span>
-            <span className="text-[11px] text-slate-600 mt-1">Drop cards here</span>
+          <div className="h-20 border border-dashed border-zinc-850 rounded-lg flex items-center justify-center text-zinc-600 text-[11px]">
+            Empty column
           </div>
         )}
       </div>
 
-      {/* Column Footer: Quick Add Task */}
-      <div className="pt-2 mt-2 border-t border-slate-800/80">
+      {/* Column Footer: Quick Add */}
+      <div className="pt-2 mt-2 border-t border-zinc-800/80">
         {isAdding ? (
-          <form onSubmit={handleCreateTask} className="bg-slate-800/90 rounded-xl p-2.5 border border-indigo-500/40">
+          <form onSubmit={handleCreateTask} className="bg-zinc-900 rounded-lg p-2 border border-zinc-700">
             <textarea
               autoFocus
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
-              placeholder="Task title or description..."
+              placeholder="Task title..."
               rows={2}
-              className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 resize-none"
+              className="w-full bg-zinc-950 border border-zinc-800 rounded p-1.5 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-blue-500 resize-none"
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
@@ -225,16 +220,16 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
                 }
               }}
             />
-            <div className="flex items-center justify-between gap-2 mt-2">
-              <div className="flex items-center gap-1.5">
+            <div className="flex items-center justify-between gap-2 mt-1.5">
+              <div className="flex items-center gap-1 font-mono text-[11px]">
                 <select
                   value={newPriority}
                   onChange={(e) => setNewPriority(e.target.value as Priority)}
-                  className="bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-[11px] text-slate-300"
+                  className="bg-zinc-950 border border-zinc-800 rounded px-1.5 py-0.5 text-zinc-300 text-[11px]"
                 >
                   <option value="urgent">Urgent</option>
                   <option value="high">High</option>
-                  <option value="medium">Medium</option>
+                  <option value="medium">Med</option>
                   <option value="low">Low</option>
                 </select>
                 <input
@@ -243,9 +238,8 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
                   max="100"
                   value={newPoints}
                   onChange={(e) => setNewPoints(e.target.value)}
-                  placeholder="pts"
-                  className="w-12 bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-[11px] text-slate-300 font-mono"
-                  title="Story Points"
+                  placeholder="sp"
+                  className="w-10 bg-zinc-950 border border-zinc-800 rounded px-1 py-0.5 text-zinc-300 text-[11px]"
                 />
               </div>
 
@@ -253,13 +247,13 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsAdding(false)}
-                  className="px-2 py-1 text-xs text-slate-400 hover:text-white rounded"
+                  className="px-2 py-0.5 text-xs text-zinc-400 hover:text-zinc-200"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-2.5 py-1 text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg shadow"
+                  className="px-2.5 py-0.5 text-xs font-medium bg-blue-600 hover:bg-blue-500 text-white rounded transition"
                 >
                   Add
                 </button>
@@ -269,7 +263,7 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
         ) : (
           <button
             onClick={() => setIsAdding(true)}
-            className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/80 transition border border-transparent hover:border-slate-700/50"
+            className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-normal text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900 transition"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Add Task</span>

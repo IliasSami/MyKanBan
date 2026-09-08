@@ -52,7 +52,6 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
   const [isAddingCol, setIsAddingCol] = useState(false);
   const [newColTitle, setNewColTitle] = useState('');
 
-  // Sensors with distance constraint to avoid hijacking card clicks
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -80,7 +79,6 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
     const currentTask = board.tasks.find((t) => t.id === activeId);
     if (!currentTask) return;
 
-    // Check if dragging over a column directly
     const isOverColumn = board.columns.some((c) => c.id === overId);
     if (isOverColumn) {
       if (currentTask.columnId !== overId) {
@@ -89,7 +87,6 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
       return;
     }
 
-    // Check if dragging over another task
     const overTask = board.tasks.find((t) => t.id === overId);
     if (overTask && currentTask.columnId !== overTask.columnId) {
       const overIndex = board.tasks
@@ -110,13 +107,11 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
     const currentTask = board.tasks.find((t) => t.id === activeId);
     if (!currentTask) return;
 
-    // Dropped over a column directly
     if (board.columns.some((c) => c.id === overId)) {
       onMoveTask(activeId, overId, board.tasks.filter((t) => t.columnId === overId).length);
       return;
     }
 
-    // Dropped over another task
     const overTask = board.tasks.find((t) => t.id === overId);
     if (overTask) {
       const colTasks = board.tasks.filter((t) => t.columnId === overTask.columnId);
@@ -141,8 +136,8 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex-1 overflow-x-auto p-4 lg:p-6">
-        <div className="flex items-start gap-5 min-w-max pb-6">
+      <div className="flex-1 overflow-x-auto p-4 lg:p-6 bg-zinc-950">
+        <div className="flex items-start gap-4 min-w-max pb-6">
           {board.columns.map((column) => {
             const columnTasks = board.tasks
               .filter((t) => t.columnId === column.id)
@@ -162,43 +157,43 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
             );
           })}
 
-          {/* Add New Column Button / Inline Form */}
-          <div className="w-80 min-w-[320px]">
+          {/* Add New Column */}
+          <div className="w-72 min-w-[288px]">
             {isAddingCol ? (
               <form
                 onSubmit={handleCreateColumn}
-                className="bg-slate-900/80 border border-indigo-500/50 rounded-2xl p-3.5 shadow-xl"
+                className="bg-zinc-950 border border-zinc-800 rounded-xl p-3 shadow-lg"
               >
                 <input
                   type="text"
                   autoFocus
                   value={newColTitle}
                   onChange={(e) => setNewColTitle(e.target.value)}
-                  placeholder="Column name (e.g., Testing, Blocked)..."
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                  placeholder="Column name..."
+                  className="w-full bg-zinc-900 border border-zinc-700 rounded px-2.5 py-1.5 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-blue-500"
                 />
-                <div className="flex items-center justify-end gap-2 mt-2.5">
+                <div className="flex items-center justify-end gap-2 mt-2">
                   <button
                     type="button"
                     onClick={() => setIsAddingCol(false)}
-                    className="px-2.5 py-1 text-xs text-slate-400 hover:text-white rounded"
+                    className="px-2 py-1 text-xs text-zinc-400 hover:text-zinc-200"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-3 py-1 text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg shadow"
+                    className="px-3 py-1 text-xs font-medium bg-blue-600 hover:bg-blue-500 text-white rounded transition"
                   >
-                    Add Column
+                    Add
                   </button>
                 </div>
               </form>
             ) : (
               <button
                 onClick={() => setIsAddingCol(true)}
-                className="w-full flex items-center justify-center gap-2 p-4 rounded-2xl border-2 border-dashed border-slate-800 hover:border-slate-700 bg-slate-900/30 hover:bg-slate-900/60 text-slate-400 hover:text-slate-200 transition text-sm font-medium"
+                className="w-full flex items-center justify-center gap-1.5 p-3 rounded-xl border border-dashed border-zinc-800 hover:border-zinc-700 bg-zinc-950/40 hover:bg-zinc-900/40 text-zinc-500 hover:text-zinc-300 transition text-xs font-medium"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-3.5 h-3.5" />
                 <span>Add Column</span>
               </button>
             )}
@@ -206,10 +201,10 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
         </div>
       </div>
 
-      {/* Drag Overlay for smooth card preview under pointer */}
+      {/* Minimal Drag Overlay */}
       <DragOverlay>
         {activeTask ? (
-          <div className="rotate-2 scale-105 shadow-2xl opacity-90">
+          <div className="rotate-1 shadow-2xl opacity-95">
             <KanbanCard
               task={activeTask}
               onOpenDetail={() => {}}

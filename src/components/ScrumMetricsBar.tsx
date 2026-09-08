@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Target, CheckCircle2, TrendingUp, Award, Layers } from 'lucide-react';
+import { Target, CheckCircle2, Layers } from 'lucide-react';
 import type { Column, Task } from '../types/kanban';
 import { fireSprintCelebration } from './Confetti';
 
@@ -9,7 +9,6 @@ interface ScrumMetricsBarProps {
 }
 
 export const ScrumMetricsBar: React.FC<ScrumMetricsBarProps> = ({ columns, tasks }) => {
-  // Find "Done" or completed column
   const doneColumnIds = columns
     .filter((c) => c.title.toLowerCase().includes('done') || c.title.toLowerCase().includes('completed'))
     .map((c) => c.id);
@@ -27,7 +26,6 @@ export const ScrumMetricsBar: React.FC<ScrumMetricsBarProps> = ({ columns, tasks
 
   const prevPercentageRef = useRef(percentage);
 
-  // Trigger confetti celebration when reaching 100%
   useEffect(() => {
     if (percentage === 100 && totalPoints > 0 && prevPercentageRef.current < 100) {
       fireSprintCelebration();
@@ -36,61 +34,51 @@ export const ScrumMetricsBar: React.FC<ScrumMetricsBarProps> = ({ columns, tasks
   }, [percentage, totalPoints]);
 
   return (
-    <div className="bg-slate-900/60 border-b border-slate-800/80 px-4 lg:px-6 py-2.5">
+    <div className="bg-zinc-950 border-b border-zinc-800/80 px-4 lg:px-6 py-2">
       <div className="max-w-[1920px] mx-auto flex flex-wrap items-center justify-between gap-4 text-xs">
-        {/* Left: Sprint Story Points Progress */}
-        <div className="flex items-center gap-4 flex-1 min-w-[280px]">
-          <div className="flex items-center gap-1.5 text-slate-400 font-medium">
-            <Target className="w-4 h-4 text-indigo-400" />
-            <span>Sprint Velocity:</span>
+        {/* Sprint Velocity Progress */}
+        <div className="flex items-center gap-3 flex-1 min-w-[260px] max-w-lg">
+          <div className="flex items-center gap-1 text-zinc-400 font-medium">
+            <Target className="w-3.5 h-3.5 text-blue-400" />
+            <span>Velocity:</span>
           </div>
 
-          <div className="flex-1 max-w-xs bg-slate-800 rounded-full h-2.5 overflow-hidden border border-slate-700/50 relative">
+          <div className="flex-1 bg-zinc-900 rounded-full h-1.5 overflow-hidden border border-zinc-800">
             <div
-              className="h-full bg-gradient-to-r from-indigo-500 via-cyan-400 to-emerald-400 rounded-full transition-all duration-500 ease-out"
+              className="h-full bg-blue-500 rounded-full transition-all duration-300 ease-out"
               style={{ width: `${percentage}%` }}
             />
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-white">
-              {donePoints} <span className="text-slate-400 font-normal">/ {totalPoints} SP</span>
-            </span>
-            <span className="px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-mono text-[11px] font-bold border border-indigo-500/30">
+          <div className="flex items-center gap-1.5 font-mono text-xs">
+            <span className="text-zinc-100 font-semibold">{donePoints}</span>
+            <span className="text-zinc-500">/</span>
+            <span className="text-zinc-400">{totalPoints} sp</span>
+            <span className="text-[11px] font-semibold text-blue-400 bg-blue-500/10 px-1.5 py-0.2 rounded border border-blue-500/20">
               {percentage}%
             </span>
           </div>
         </div>
 
-        {/* Right: Quick Scrum Metrics Badges */}
-        <div className="flex items-center gap-4 flex-wrap">
-          <div className="flex items-center gap-1.5 text-slate-300 bg-slate-800/50 px-2.5 py-1 rounded-lg border border-slate-700/40">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Completed:</span>
-            <span className="font-bold text-white">{doneTasksCount}</span>
-            <span className="text-slate-500">({taskPercentage}%)</span>
+        {/* Minimal Metrics Counters */}
+        <div className="flex items-center gap-4 text-xs font-mono text-zinc-400">
+          <div className="flex items-center gap-1.5">
+            <CheckCircle2 className="w-3.5 h-3.5 text-zinc-500" />
+            <span>Done:</span>
+            <span className="text-zinc-200 font-semibold">{doneTasksCount}/{totalTasksCount}</span>
+            <span className="text-zinc-600">({taskPercentage}%)</span>
           </div>
 
-          <div className="flex items-center gap-1.5 text-slate-300 bg-slate-800/50 px-2.5 py-1 rounded-lg border border-slate-700/40">
-            <Layers className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Total Tasks:</span>
-            <span className="font-bold text-white">{totalTasksCount}</span>
-          </div>
-
-          <div className="flex items-center gap-1.5 text-slate-300 bg-slate-800/50 px-2.5 py-1 rounded-lg border border-slate-700/40">
-            <TrendingUp className="w-3.5 h-3.5 text-amber-400" />
+          <div className="flex items-center gap-1.5">
+            <Layers className="w-3.5 h-3.5 text-zinc-500" />
             <span>Columns:</span>
-            <span className="font-bold text-white">{columns.length}</span>
+            <span className="text-zinc-200 font-semibold">{columns.length}</span>
           </div>
 
           {percentage === 100 && totalPoints > 0 && (
-            <button
-              onClick={() => fireSprintCelebration()}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-semibold animate-pulse hover:bg-emerald-500/30 transition"
-            >
-              <Award className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Sprint Completed! 🎉</span>
-            </button>
+            <span className="text-blue-400 font-semibold font-sans bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20 text-[11px]">
+              Sprint 100% Complete
+            </span>
           )}
         </div>
       </div>

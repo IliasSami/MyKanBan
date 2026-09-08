@@ -17,6 +17,65 @@ export interface ParsedColumnDraft {
 }
 
 /**
+ * Strips raw markdown tokens and special characters from text,
+ * ensuring clean, readable UI titles and labels.
+ */
+export function cleanMarkdownText(raw: string): string {
+  if (!raw) return '';
+  let text = raw.trim();
+
+  // Strip leading bullet markers, checkboxes, headers, blockquotes
+  text = text.replace(/^(?:[-*+]|\d+\.)\s+/, '');
+  text = text.replace(/^\[[ xX]\]\s*/, '');
+  text = text.replace(/^#{1,6}\s*/, '');
+  text = text.replace(/^>+\s*/, '');
+
+  // Strip bold and italic markdown markers: ***text***, **text**, *text*, ___text___, __text__, _text_
+  text = text.replace(/\*\*\*([^*]+)\*\*\*/g, '$1');
+  text = text.replace(/\*\*([^*]+)\*\*/g, '$1');
+  text = text.replace(/\*([^*]+)\*/g, '$1');
+  text = text.replace(/___([^_]+)___/g, '$1');
+  text = text.replace(/__([^_]+)__/g, '$1');
+  text = text.replace(/_([^_]+)_/g, '$1');
+
+  // Strip strikethrough: ~~text~~
+  text = text.replace(/~~([^~]+)~~/g, '$1');
+
+  // Strip inline code backticks: `code`
+  text = text.replace(/`([^`]+)`/g, '$1');
+
+  // Strip markdown links: [label](url) -> label
+  text = text.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+
+  // Strip raw HTML tags: <tag> -> ''
+  text = text.replace(/<[^>]*>/g, '');
+
+  // Normalize whitespace
+  text = text.replace(/\s+/g, ' ').trim();
+
+  return text;
+}
+
+/**
+ * Cleans multi-line markdown descriptions:
+ * Strips leading blockquote '>' markers from each line and cleans markdown formatting
+ */
+export function cleanMarkdownDescription(raw: string): string {
+  if (!raw) return '';
+  return raw
+    .split(/\r?\n/)
+    .map((line) => {
+      let l = line.trim();
+      // Remove leading blockquote markers (> or >>)
+      l = l.replace(/^>+\s*/, '');
+      return cleanMarkdownText(l);
+    })
+    .filter((line, idx, arr) => line || (idx > 0 && arr[idx - 1]))
+    .join('\n')
+    .trim();
+}
+
+/**
  * Extracts metadata from a task string:
  * - Assignee: @name or @(First Last)
  * - Priority: #urgent, #high, #medium, #low
@@ -68,8 +127,8 @@ export function extractTaskMetadata(rawLine: string): ParsedTaskDraft {
     }
   }
 
-  // Clean up title
-  const title = text.replace(/\s+/g, ' ').trim();
+  // Clean title from any markdown tokens
+  const title = cleanMarkdownText(text);
 
   return {
     title: title || 'Untitled Task',
@@ -105,46 +164,67 @@ export function parseMarkdown(markdown: string): ParseResult {
 
     if (!line) continue;
 
-    // Check if line is Board Title: "# My Project Kanban"
-    if (/^#\s+/.test(line) && columns.length === 0 && !currentColumn) {
-      boardTitle = line.replace(/^#\s+/, '').trim();
-      continue;
+    // Check if line is Column Header:
+    // Markdown headers: `# Title` or `## Column` or `### **Column**`
+    // Bold lines: `**Column:**` or `**Column**`
+    let isHeader = false;
+    let rawColTitle = '';
+
+    const hashHeaderMatch = line.match(/^#{1,6}\s+(.*)$/);
+    if (hashHeaderMatch) {
+      isHeader = true;
+      rawColTitle = hashHeaderMatch[1];
+    } else {
+      const boldHeaderMatch = line.match(/^\*\*([^*]+)\*\*:?$/);
+      if (boldHeaderMatch) {
+        isHeader = true;
+        rawColTitle = boldHeaderMatch[1];
+      }
     }
 
-    // Check if line is Column Header: "## Column Name" or "### Column Name" or "**Column Name:**"
-    const colHeaderMatch = line.match(/^(?:#{1,3}\s+|\*\*)([^*#]+)(?:\*\*|:)?$/);
-    if (colHeaderMatch && !line.startsWith('-') && !line.startsWith('*')) {
-      const colTitle = colHeaderMatch[1].trim();
-      currentColumn = {
-        title: colTitle,
-        tasks: [],
-      };
-      columns.push(currentColumn);
-      currentTask = null;
-      continue;
+    if (isHeader && !line.startsWith('-') && !line.startsWith('*') && !line.startsWith('+')) {
+      // If it's a top-level # and we haven't set columns yet, treat as Board Title
+      if (/^#\s+/.test(line) && !line.startsWith('##') && columns.length === 0 && !currentColumn) {
+        boardTitle = cleanMarkdownText(rawColTitle);
+        continue;
+      }
+
+      const colTitle = cleanMarkdownText(rawColTitle);
+      if (colTitle) {
+        currentColumn = {
+          title: colTitle,
+          tasks: [],
+        };
+        columns.push(currentColumn);
+        currentTask = null;
+        continue;
+      }
     }
 
     // Check if indented line belongs to previous task (description or subtask)
-    if (currentTask && (rawLine.startsWith('  ') || rawLine.startsWith('\t'))) {
+    if (currentTask && (rawLine.startsWith('  ') || rawLine.startsWith('\t') || rawLine.startsWith('>'))) {
       const subtaskMatch = line.match(/^[-*]\s+(?:\[([ xX])\]\s+)?(.*)$/);
       if (subtaskMatch) {
         if (!currentTask.subtasks) currentTask.subtasks = [];
         currentTask.subtasks.push({
           id: `sub-${Math.random().toString(36).substring(2, 9)}`,
-          title: subtaskMatch[2].trim(),
+          title: cleanMarkdownText(subtaskMatch[2]),
           completed: subtaskMatch[1]?.toLowerCase() === 'x',
         });
       } else {
-        // Appending to description
-        currentTask.description = currentTask.description
-          ? `${currentTask.description}\n${line}`
-          : line;
+        // Appending to description, cleaning markdown quotes
+        const cleanedLine = cleanMarkdownDescription(line);
+        if (cleanedLine) {
+          currentTask.description = currentTask.description
+            ? `${currentTask.description}\n${cleanedLine}`
+            : cleanedLine;
+        }
       }
       continue;
     }
 
     // Check if line is a top-level task bullet: "- [ ] Task" or "- [x] Task" or "- Task" or "* Task" or "1. Task"
-    const taskMatch = line.match(/^(?:[-*]|\d+\.)\s+(?:\[([ xX])\]\s+)?(.*)$/);
+    const taskMatch = line.match(/^(?:[-*+]|\d+\.)\s+(?:\[([ xX])\]\s+)?(.*)$/);
     if (taskMatch) {
       const isCompleted = taskMatch[1]?.toLowerCase() === 'x';
       const taskBody = taskMatch[2];
@@ -205,12 +285,13 @@ export function parseCSV(csvContent: string): ParseResult {
 
   for (const row of result.data) {
     // Find title
-    const title = row['title'] || row['name'] || row['task'] || row['summary'] || row['item'];
-    if (!title) continue;
+    const rawTitle = row['title'] || row['name'] || row['task'] || row['summary'] || row['item'];
+    if (!rawTitle) continue;
+    const title = cleanMarkdownText(rawTitle);
 
     // Find column / status
-    const column = row['column'] || row['status'] || row['stage'] || row['lane'] || row['state'] || defaultColumn;
-    const colName = column.trim();
+    const rawColumn = row['column'] || row['status'] || row['stage'] || row['lane'] || row['state'] || defaultColumn;
+    const colName = cleanMarkdownText(rawColumn);
 
     // Priority
     const rawPriority = (row['priority'] || row['severity'] || 'medium').toLowerCase().trim();
@@ -224,23 +305,25 @@ export function parseCSV(csvContent: string): ParseResult {
     const storyPoints = rawPoints ? parseInt(rawPoints, 10) : undefined;
 
     // Assignee
-    const assignee = row['assignee'] || row['owner'] || row['assigned to'] || row['assigned'] || undefined;
+    const rawAssignee = row['assignee'] || row['owner'] || row['assigned to'] || row['assigned'] || undefined;
+    const assignee = rawAssignee ? cleanMarkdownText(rawAssignee) : undefined;
 
     // Description
-    const description = row['description'] || row['details'] || row['notes'] || undefined;
+    const rawDesc = row['description'] || row['details'] || row['notes'] || undefined;
+    const description = rawDesc ? cleanMarkdownDescription(rawDesc) : undefined;
 
     // Tags
     const rawTags = row['tags'] || row['labels'] || row['category'] || '';
     const tags = rawTags
-      ? rawTags.split(/[,;|]/).map((t) => t.trim()).filter(Boolean)
+      ? rawTags.split(/[,;|]/).map((t) => cleanMarkdownText(t)).filter(Boolean)
       : [];
 
     const task: ParsedTaskDraft = {
-      title: title.trim(),
-      description: description?.trim(),
+      title,
+      description,
       priority,
       storyPoints: Number.isNaN(storyPoints) ? undefined : storyPoints,
-      assignee: assignee?.trim(),
+      assignee,
       tags,
     };
 

@@ -1,0 +1,6 @@
+{
+  "name": "designer-toolkit",
+  "version": "1.0.0",
+  "description": "Designer utility skills: design rationale, presentations, case studies, UX writing, design system adoption, token audits, and design negotiation.",
+  "contextFileName": "GEMINI.md"
+}

@@ -1,0 +1,6 @@
+{
+  "name": "interaction-design",
+  "version": "1.0.0",
+  "description": "Interaction design skills: micro-interactions, animation principles, state machines, gesture patterns, error handling, feedback, cognitive laws, forms, onboarding, navigation, and search.",
+  "contextFileName": "GEMINI.md"
+}

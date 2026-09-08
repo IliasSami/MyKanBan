@@ -1,5 +1,13 @@
 import { describe, it, expect } from 'vitest';
-import { parseMarkdown, parseCSV, extractTaskMetadata, exportToMarkdown, exportToCSV } from './parser';
+import {
+  parseMarkdown,
+  parseCSV,
+  extractTaskMetadata,
+  exportToMarkdown,
+  exportToCSV,
+  cleanMarkdownText,
+  cleanMarkdownDescription,
+} from './parser';
 
 describe('Kanban Ingestion Engine', () => {
   it('extracts task metadata accurately', () => {
@@ -12,6 +20,32 @@ describe('Kanban Ingestion Engine', () => {
     expect(meta.storyPoints).toBe(5);
     expect(meta.tags).toContain('feature');
     expect(meta.tags).toContain('core');
+  });
+
+  it('strips markdown special characters cleanly from titles, headers, and descriptions', () => {
+    // Bold, italic, code, quotes, links
+    expect(cleanMarkdownText('**Refactor Engine**: `v2` update')).toBe('Refactor Engine: v2 update');
+    expect(cleanMarkdownText('Fix [issue #42](https://github.com/issues/42)')).toBe('Fix issue #42');
+    expect(cleanMarkdownText('### **Sprint Review**')).toBe('Sprint Review');
+    expect(cleanMarkdownDescription('> Detailed notes on architecture\n> Second line')).toBe(
+      'Detailed notes on architecture\nSecond line'
+    );
+
+    const md = `
+# **Sprint 25: AI Engine**
+
+## ### **In Progress**
+- [ ] **Ingest Markdown files** @Alex #urgent ~5
+  > Parser should strip > and **bold** formatting
+  - [x] **Subtask item with bold**
+`;
+
+    const result = parseMarkdown(md);
+    expect(result.title).toBe('Sprint 25: AI Engine');
+    expect(result.columns[0].title).toBe('In Progress');
+    expect(result.columns[0].tasks[0].title).toBe('Ingest Markdown files');
+    expect(result.columns[0].tasks[0].description).toBe('Parser should strip > and bold formatting');
+    expect(result.columns[0].tasks[0].subtasks?.[0].title).toBe('Subtask item with bold');
   });
 
   it('parses structured Markdown with columns, tasks, and subtasks', () => {

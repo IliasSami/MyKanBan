@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { Board, Column, Task, Project, UserProfile, Priority } from '../types/kanban';
+import { cleanMarkdownText, cleanMarkdownDescription } from '../utils/parser';
 
 const STORAGE_KEY_PROJECTS = 'mykanban_projects';
 const STORAGE_KEY_CURRENT_PROJECT = 'mykanban_current_project_id';
@@ -10,9 +11,30 @@ const BROADCAST_CHANNEL_NAME = 'mykanban_broadcast_sync';
 const defaultUser: UserProfile = {
   id: 'user-' + Math.random().toString(36).substring(2, 8),
   name: 'Alex Developer',
-  avatarColor: '#6366f1',
+  avatarColor: '#3b82f6',
   initials: 'AD',
 };
+
+// Sanitizes board data by stripping any leftover markdown tokens
+export function sanitizeBoard(b: Board): Board {
+  return {
+    ...b,
+    title: cleanMarkdownText(b.title),
+    columns: b.columns.map((col) => ({
+      ...col,
+      title: cleanMarkdownText(col.title),
+    })),
+    tasks: b.tasks.map((t) => ({
+      ...t,
+      title: cleanMarkdownText(t.title),
+      description: t.description ? cleanMarkdownDescription(t.description) : undefined,
+      subtasks: t.subtasks?.map((s) => ({
+        ...s,
+        title: cleanMarkdownText(s.title),
+      })),
+    })),
+  };
+}
 
 // Generate random collab code like "KAN-839"
 export function generateCollabCode(): string {
@@ -171,22 +193,23 @@ export function useKanbanStore() {
   const [board, setBoard] = useState<Board>(() => {
     try {
       const saved = localStorage.getItem(`mykanban_board_${currentProjectId}`);
-      if (saved) return JSON.parse(saved);
+      if (saved) return sanitizeBoard(JSON.parse(saved));
     } catch {}
     const demo = createDemoProject();
-    return demo.board;
+    return sanitizeBoard(demo.board);
   });
 
   // Save changes to localStorage and broadcast to other tabs
   const persistBoard = useCallback((updatedBoard: Board, shouldBroadcast = true) => {
-    setBoard(updatedBoard);
+    const clean = sanitizeBoard(updatedBoard);
+    setBoard(clean);
     try {
-      localStorage.setItem(`mykanban_board_${updatedBoard.projectId}`, JSON.stringify(updatedBoard));
+      localStorage.setItem(`mykanban_board_${clean.projectId}`, JSON.stringify(clean));
       if (shouldBroadcast && broadcastChannel) {
         broadcastChannel.postMessage({
           type: 'BOARD_UPDATED',
-          projectId: updatedBoard.projectId,
-          board: updatedBoard,
+          projectId: clean.projectId,
+          board: clean,
         });
       }
     } catch (err) {
@@ -200,7 +223,7 @@ export function useKanbanStore() {
 
     const handleMessage = (event: MessageEvent) => {
       if (event.data?.type === 'BOARD_UPDATED' && event.data?.projectId === currentProjectId) {
-        setBoard(event.data.board);
+        setBoard(sanitizeBoard(event.data.board));
       }
     };
 
@@ -216,7 +239,7 @@ export function useKanbanStore() {
       localStorage.setItem(STORAGE_KEY_CURRENT_PROJECT, currentProjectId);
       const saved = localStorage.getItem(`mykanban_board_${currentProjectId}`);
       if (saved) {
-        setBoard(JSON.parse(saved));
+        setBoard(sanitizeBoard(JSON.parse(saved)));
       } else {
         // Fallback for fresh project
         const curProj = projects.find((p) => p.id === currentProjectId);
