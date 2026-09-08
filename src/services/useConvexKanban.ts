@@ -17,7 +17,7 @@ const defaultUser: UserProfile = {
 
 export function useConvexKanban() {
   const [activeCode, setActiveCode] = useState<string>(() => {
-    return localStorage.getItem(STORAGE_KEY_CODE) || 'KAN-842';
+    return localStorage.getItem(STORAGE_KEY_CODE) || 'XBW-843';
   });
 
   const [user, setUser] = useState<UserProfile>(() => {
