@@ -36,33 +36,80 @@ interface ImportModalProps {
   ) => void;
 }
 
-const SAMPLE_MARKDOWN = `# Sprint 25: AI Workflow Engine
+const SAMPLE_SEO_AUDIT = `# OutCraft.ai Technical SEO Remediation — Sprint Workflow
+
+> Crawl: https://www.outcraft.ai/ · Screaming Frog 19.8 · 2026-09-07 · HubSpot CMS behind Cloudflare
+> Flow: P0 this week → P1 this month → P2 quarter → P3 opportunistic · Re-audit loop gates "Done"
 
 ## Backlog
-- [ ] Research WebAssembly parsing pipelines @Alex #high ~5
-- [ ] Investigate Redis cache for Edge Workers #low ~2
-- [ ] Team member permission roles architecture #medium ~3
+
+- [ ] Rewrite Link Anchor Text Sitewide @Content #high ~5 #seo #links #accessibility
+  > 236 outlinks have no anchor text; 108 use non-descriptive text ("click here", "learn more").
+  - [ ] Audit rich-text content and CTA modules for empty anchors
+  - [ ] Replace generic anchors with descriptive link labels
+  - [ ] Add aria-labels to icon/CTA links
+
+- [ ] Compress Images Over 100 KB @Content #medium ~5 #images #media #hubspot
+  > 1,058 images exceed 100 KB; prefer WebP/AVIF via HubSpot Files hs-fs width params.
+  - [ ] Re-export heaviest images to WebP/AVIF
+  - [ ] Serve per-width variants from HubSpot Files
+  - [ ] Shrink 205 image alt-text issues (90 missing, 73 empty, 42 too long)
+
+- [ ] Add Width and Height to Image Tags @Dev #medium ~3 #images #html #hubspot
+  > 170 images missing width/height cause layout shift; fix at the image-module template level.
+
+- [ ] Implement Security Headers Sitewide @DevOps #medium ~5 #security #headers #cloudflare
+  > XFO missing on 97.8% of pages; Referrer-Policy missing 92.96%; XCTO 14.2%; CSP 9.3%.
+  - [ ] Set X-Frame-Options: SAMEORIGIN at Cloudflare edge or HubSpot
+  - [ ] Set X-Content-Type-Options: nosniff
+  - [ ] Set Referrer-Policy: strict-origin-when-cross-origin
 
 ## Sprint To-Do
-- [ ] Configure Cloudflare D1 local database migrations @David #high ~5
-- [ ] Build drag-and-drop card preview @Sarah #urgent ~3
-  - Include ghost placeholder
-  - Test on mobile touch devices
-- [ ] Implement Collab Code join dialog @Alex #high ~3
+
+- [ ] Write Unique Title Tags @Content #high ~3 #seo #meta #hubspot
+  > 57 titles exceed 60 chars; /pricing has raw URL as title; 2 duplicate pairs.
+  - [ ] Add a real title to /pricing
+  - [ ] Trim the automated " | Outcraft AI" suffix in the blog template
+
+- [ ] Rewrite Meta Descriptions @Content #high ~3 #seo #meta #hubspot
+  > 30 descriptions exceed 155 chars; homepage/about/blog-index fallback reused on non-edit pages.
+  - [ ] Write unique under-160-char descriptions per page
+  - [ ] Lengthen /webinars description to a real sentence
+
+- [ ] Fix 71 Mojibake Image URLs @Content #high ~2 #urls #images #hubspot
+  > Non-ASCII characters in file names (e.g. "Screenshot_2026-05-20_at_8.54.44â__PM.png").
+  - [ ] Re-upload or rename files with clean ASCII names
+  - [ ] Update content references to new URLs
 
 ## In Progress
-- [ ] Ingest structured Markdown files with tag extraction @Alex #urgent ~5
-  - [x] Header parsing logic
-  - [x] Checkbox bullet parsing
-  - [ ] Live visual preview modal
 
-## Code Review
-- [ ] Review PR #42: Realtime WebSocket synchronization @Sarah #urgent ~3
+- [ ] Resolve Dead Knowledge Base URLs @Content #urgent ~3 #hubspot #cms #404
+  > 18 URLs under /outcraft-ai-knowledge-base/ return 404 but are still listed in sitemap.xml.
+  - [ ] Unpublish dead KB posts in CMS
+  - [ ] Add 301 redirects to live equivalents
+
+- [ ] Eliminate Legacy Redirect Chains @SEO #urgent ~3 #redirects #links #hubspot
+  > /blog/marketing/* URLs 301 in 2 hops; will-ai-replace-sales-jobs chain ends in a 404.
+  - [ ] Add direct 301 to target slugs
+  - [ ] Link straight to targets to bypass chains entirely
+
+## Review / QA
+
+- [ ] Optimize Mobile Core Web Vitals (INP) @Dev #high ~8 #performance #analytics
+  > Mobile INP 237 ms fails the 200 ms threshold; ~475 KB unused third-party JS.
+  - [ ] Defer non-critical tracking scripts
+  - [ ] Re-run PageSpeed Insights to verify INP < 200 ms
+
+- [ ] Validate Structured Data in Rich Results Test @Dev #high ~2 #structured-data #qa
+  - [ ] Test 3–5 sample URLs in Google Rich Results Test
 
 ## Done
-- [x] React SPA Vite setup @Alex #medium ~2
-- [x] Minimal two-color design system configuration #medium ~1
+
+- [x] Crawl OutCraft.ai with Screaming Frog 19.8 @SEO #medium ~8 #screaming-frog #audit
+  > JS-rendered crawl completed: 2,084 URLs inspected, 0 5xx errors.
 `;
+
+const SAMPLE_MARKDOWN = SAMPLE_SEO_AUDIT;
 
 const SAMPLE_NOTES = `Sprint Planning & Architecture Notes:
 We met on Monday to outline our upcoming sprint goals.
@@ -395,14 +442,14 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
                   type="button"
                   onClick={() => {
                     setDocType('markdown');
-                    setContent(SAMPLE_MARKDOWN);
+                    setContent(SAMPLE_SEO_AUDIT);
                     setInputMode('editor');
-                    setFileName('Sprint25.md');
-                    setFileSize('1.2 KB');
+                    setFileName('OutCraft_SEO_Audit.md');
+                    setFileSize('5.8 KB');
                   }}
-                  className="px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800 transition font-mono text-[10px]"
+                  className="px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900/80 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 transition font-mono text-[10px] font-semibold"
                 >
-                  Scrum.md
+                  SEO Audit.md
                 </button>
                 <button
                   type="button"
