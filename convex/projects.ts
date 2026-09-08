@@ -71,17 +71,12 @@ export const getProjectByCollabCode = query({
   },
   handler: async (ctx, args) => {
     const formattedCode = args.collabCode.trim().toUpperCase();
-    let project = await ctx.db
+    const project = await ctx.db
       .query("projects")
       .withIndex("by_collabCode", (q) => q.eq("collabCode", formattedCode))
       .first();
 
-    // Fallback: If no project matches this exact code, return the most recent project
-    // so the board never hangs in an infinite loading state
-    if (!project) {
-      project = await ctx.db.query("projects").order("desc").first();
-    }
-
+    // Strict privacy: if project not found with this code, return null
     if (!project) return null;
 
     const board = await ctx.db
@@ -92,6 +87,26 @@ export const getProjectByCollabCode = query({
     return { project, board };
   },
 });
+
+export const getProjectsByCodes = query({
+  args: {
+    codes: v.array(v.string()),
+  },
+  handler: async (ctx, args) => {
+    if (args.codes.length === 0) return [];
+    const results = [];
+    for (const code of args.codes) {
+      const formatted = code.trim().toUpperCase();
+      const proj = await ctx.db
+        .query("projects")
+        .withIndex("by_collabCode", (q) => q.eq("collabCode", formatted))
+        .first();
+      if (proj) results.push(proj);
+    }
+    return results;
+  },
+});
+
 
 export const getProject = query({
   args: { projectId: v.id("projects") },

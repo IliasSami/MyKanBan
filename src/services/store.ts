@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { Board, Column, Task, Project, UserProfile, Priority } from '../types/kanban';
 import { cleanMarkdownText, cleanMarkdownDescription } from '../utils/parser';
 
@@ -189,6 +189,15 @@ export function useKanbanStore() {
     } catch {}
     return 'proj-demo-1';
   });
+
+  const currentProject: Project = useMemo(() => {
+    return projects.find((p) => p.id === currentProjectId) || projects[0] || {
+      id: 'proj-demo-1',
+      title: 'Sprint 24: Core Platform',
+      collabCode: 'KAN-842',
+      createdAt: Date.now(),
+    };
+  }, [projects, currentProjectId]);
 
   const [board, setBoard] = useState<Board>(() => {
     try {
@@ -525,7 +534,16 @@ export function useKanbanStore() {
     persistBoard(updated);
   }, [board, persistBoard]);
 
-  const currentProject = projects.find((p) => p.id === currentProjectId) || projects[0];
+  // Leave project
+  const leaveProject = useCallback((collabCode: string) => {
+    setProjects((prev) => {
+      const remaining = prev.filter((p) => p.collabCode.toUpperCase() !== collabCode.toUpperCase());
+      if (remaining.length > 0 && currentProject.collabCode === collabCode) {
+        setCurrentProjectId(remaining[0].id);
+      }
+      return remaining;
+    });
+  }, [currentProject]);
 
   return {
     user,
@@ -536,6 +554,7 @@ export function useKanbanStore() {
     setCurrentProjectId,
     createProject,
     joinProjectByCode,
+    leaveProject,
     board,
     addTask,
     updateTask,

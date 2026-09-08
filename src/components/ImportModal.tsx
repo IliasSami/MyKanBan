@@ -123,24 +123,34 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150">
-      <div className="bg-zinc-950 border border-zinc-800 rounded-xl w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="import-modal-title"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-zinc-800 bg-zinc-950">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
           <div>
-            <h2 className="text-sm font-semibold text-zinc-100 flex items-center gap-2">
+            <h2 id="import-modal-title" className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
               Import Board Data
-              <span className="text-[10px] font-mono font-medium px-1.5 py-0.2 rounded bg-zinc-900 text-zinc-400 border border-zinc-800">
+              <span className="text-[10px] font-mono font-medium px-1.5 py-0.2 rounded bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">
                 MD / CSV
               </span>
             </h2>
-            <p className="text-xs text-zinc-400 mt-0.5">
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
               Transform Markdown or CSV into a visual Scrum Kanban board.
             </p>
           </div>
           <button
             onClick={onClose}
-            className="text-zinc-500 hover:text-zinc-200 p-1 rounded hover:bg-zinc-900 transition"
+            aria-label="Close import modal"
+            className="text-zinc-400 hover:text-zinc-700 dark:text-zinc-500 dark:hover:text-zinc-200 p-1 rounded hover:bg-zinc-100 dark:hover:bg-zinc-900 transition focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:outline-none"
           >
             <X className="w-4 h-4" />
           </button>
@@ -149,14 +159,14 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
         {/* Content Body */}
         <div className="flex-1 overflow-y-auto p-5 space-y-4">
           {/* Tabs */}
-          <div className="flex flex-wrap items-center justify-between gap-3 pb-2 border-b border-zinc-800/80">
-            <div className="flex items-center gap-1 bg-zinc-900 p-1 rounded-lg border border-zinc-800 text-xs">
+          <div className="flex flex-wrap items-center justify-between gap-3 pb-2 border-b border-zinc-200 dark:border-zinc-800/80">
+            <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-900 p-1 rounded-lg border border-zinc-200 dark:border-zinc-800 text-xs">
               <button
                 onClick={() => setActiveTab('paste')}
                 className={`px-3 py-1 rounded font-medium transition flex items-center gap-1.5 ${
                   activeTab === 'paste'
-                    ? 'bg-zinc-800 text-zinc-100'
-                    : 'text-zinc-400 hover:text-zinc-200'
+                    ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs'
+                    : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
                 }`}
               >
                 <FileText className="w-3.5 h-3.5" />
@@ -166,8 +176,8 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
                 onClick={() => setActiveTab('upload')}
                 className={`px-3 py-1 rounded font-medium transition flex items-center gap-1.5 ${
                   activeTab === 'upload'
-                    ? 'bg-zinc-800 text-zinc-100'
-                    : 'text-zinc-400 hover:text-zinc-200'
+                    ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs'
+                    : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
                 }`}
               >
                 <FileUp className="w-3.5 h-3.5" />
@@ -185,7 +195,7 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
                   setTextContent(SAMPLE_MARKDOWN);
                   setActiveTab('paste');
                 }}
-                className="px-2 py-0.5 rounded bg-zinc-900 hover:bg-zinc-850 text-zinc-300 border border-zinc-800 transition"
+                className="px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-850 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800 transition focus-visible:ring-2 focus-visible:ring-blue-600"
               >
                 Scrum.md
               </button>
@@ -196,7 +206,7 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
                   setTextContent(SAMPLE_CSV);
                   setActiveTab('paste');
                 }}
-                className="px-2 py-0.5 rounded bg-zinc-900 hover:bg-zinc-850 text-zinc-300 border border-zinc-800 transition"
+                className="px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-850 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800 transition focus-visible:ring-2 focus-visible:ring-blue-600"
               >
                 Tasks.csv
               </button>
@@ -214,8 +224,8 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
               onDrop={handleDrop}
               className={`border border-dashed rounded-xl p-10 text-center transition flex flex-col items-center justify-center gap-2.5 cursor-pointer ${
                 dragOver
-                  ? 'border-blue-500 bg-blue-500/5'
-                  : 'border-zinc-800 bg-zinc-900/30 hover:bg-zinc-900/60'
+                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-500/5'
+                  : 'border-zinc-300 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/30 hover:bg-zinc-100/50 dark:hover:bg-zinc-900/60'
               }`}
               onClick={() => document.getElementById('file-upload-input')?.click()}
             >
@@ -228,11 +238,11 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
                   if (e.target.files?.[0]) handleFileUpload(e.target.files[0]);
                 }}
               />
-              <div className="p-3 rounded-lg bg-zinc-900 text-zinc-400 border border-zinc-800">
+              <div className="p-3 rounded-lg bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">
                 <Upload className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-xs font-medium text-zinc-200">
+                <p className="text-xs font-medium text-zinc-800 dark:text-zinc-200">
                   Select or drag a file here
                 </p>
                 <p className="text-[11px] text-zinc-500 mt-0.5">
@@ -240,7 +250,7 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
                 </p>
               </div>
               {fileName && (
-                <div className="text-xs text-zinc-300 font-mono bg-zinc-900 px-2.5 py-0.5 rounded border border-zinc-800">
+                <div className="text-xs text-zinc-700 dark:text-zinc-300 font-mono bg-zinc-100 dark:bg-zinc-900 px-2.5 py-0.5 rounded border border-zinc-200 dark:border-zinc-800">
                   {fileName}
                 </div>
               )}
@@ -251,23 +261,23 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
               <div className="flex items-center justify-between text-xs">
                 <div className="flex items-center gap-3">
                   <span className="text-zinc-500">Format:</span>
-                  <label className="flex items-center gap-1.5 cursor-pointer text-zinc-300">
+                  <label className="flex items-center gap-1.5 cursor-pointer text-zinc-700 dark:text-zinc-300">
                     <input
                       type="radio"
                       name="format"
                       checked={format === 'markdown'}
                       onChange={() => setFormat('markdown')}
-                      className="accent-blue-600"
+                      className="accent-blue-600 focus-visible:ring-2 focus-visible:ring-blue-600"
                     />
                     <span>Markdown</span>
                   </label>
-                  <label className="flex items-center gap-1.5 cursor-pointer text-zinc-300">
+                  <label className="flex items-center gap-1.5 cursor-pointer text-zinc-700 dark:text-zinc-300">
                     <input
                       type="radio"
                       name="format"
                       checked={format === 'csv'}
                       onChange={() => setFormat('csv')}
-                      className="accent-blue-600"
+                      className="accent-blue-600 focus-visible:ring-2 focus-visible:ring-blue-600"
                     />
                     <span>CSV</span>
                   </label>
@@ -283,26 +293,26 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
                 onChange={(e) => setTextContent(e.target.value)}
                 placeholder="Paste Markdown or CSV..."
                 rows={9}
-                className="w-full bg-zinc-900 border border-zinc-800 rounded-lg p-3 font-mono text-xs text-zinc-200 focus:outline-none focus:border-blue-500 transition resize-y leading-relaxed"
+                className="w-full bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-lg p-3 font-mono text-xs text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-blue-500 focus-visible:ring-2 focus-visible:ring-blue-600 transition resize-y leading-relaxed"
               />
             </div>
           )}
 
           {/* Clean Ingestion Preview */}
           {parseResult && (
-            <div className="bg-zinc-900/60 border border-zinc-800 rounded-lg p-3.5 space-y-2.5">
-              <div className="flex items-center justify-between border-b border-zinc-800/80 pb-2">
+            <div className="bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 rounded-lg p-3.5 space-y-2.5">
+              <div className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800/80 pb-2">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="w-3.5 h-3.5 text-blue-400" />
-                  <span className="text-xs font-semibold text-zinc-200">
+                  <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                  <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">
                     {parseResult.title}
                   </span>
                 </div>
 
-                <div className="flex items-center gap-3 font-mono text-[11px] text-zinc-400">
-                  <span>Columns: <strong className="text-zinc-200">{parseResult.columns.length}</strong></span>
-                  <span>Tasks: <strong className="text-zinc-200">{totalTasks}</strong></span>
-                  <span>Points: <strong className="text-zinc-200">{totalPoints} sp</strong></span>
+                <div className="flex items-center gap-3 font-mono text-[11px] text-zinc-600 dark:text-zinc-400">
+                  <span>Columns: <strong className="text-zinc-900 dark:text-zinc-200">{parseResult.columns.length}</strong></span>
+                  <span>Tasks: <strong className="text-zinc-900 dark:text-zinc-200">{totalTasks}</strong></span>
+                  <span>Points: <strong className="text-zinc-900 dark:text-zinc-200">{totalPoints} sp</strong></span>
                 </div>
               </div>
 
@@ -311,9 +321,9 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
                 {parseResult.columns.map((col, idx) => (
                   <div
                     key={idx}
-                    className="bg-zinc-950 border border-zinc-800 rounded p-2 text-xs"
+                    className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded p-2 text-xs"
                   >
-                    <div className="flex items-center justify-between font-medium text-zinc-300">
+                    <div className="flex items-center justify-between font-medium text-zinc-800 dark:text-zinc-300">
                       <span className="truncate">{col.title}</span>
                       <span className="font-mono text-[10px] text-zinc-500">
                         {col.tasks.length}
@@ -328,23 +338,23 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
           {/* Import Mode */}
           <div className="flex items-center gap-4 text-xs pt-1">
             <span className="text-zinc-500">Mode:</span>
-            <label className="flex items-center gap-1.5 cursor-pointer text-zinc-300">
+            <label className="flex items-center gap-1.5 cursor-pointer text-zinc-700 dark:text-zinc-300">
               <input
                 type="radio"
                 name="replaceMode"
                 checked={replaceExisting}
                 onChange={() => setReplaceExisting(true)}
-                className="accent-blue-600"
+                className="accent-blue-600 focus-visible:ring-2 focus-visible:ring-blue-600"
               />
               <span>Replace current board</span>
             </label>
-            <label className="flex items-center gap-1.5 cursor-pointer text-zinc-300">
+            <label className="flex items-center gap-1.5 cursor-pointer text-zinc-700 dark:text-zinc-300">
               <input
                 type="radio"
                 name="replaceMode"
                 checked={!replaceExisting}
                 onChange={() => setReplaceExisting(false)}
-                className="accent-blue-600"
+                className="accent-blue-600 focus-visible:ring-2 focus-visible:ring-blue-600"
               />
               <span>Append tasks</span>
             </label>
@@ -352,11 +362,11 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-5 py-3 border-t border-zinc-800 bg-zinc-950">
+        <div className="flex items-center justify-between px-5 py-3 border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
           <button
             type="button"
             onClick={onClose}
-            className="px-3 py-1.5 text-xs text-zinc-400 hover:text-zinc-200 rounded"
+            className="px-3 py-1.5 text-xs text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200 rounded focus-visible:ring-2 focus-visible:ring-blue-600"
           >
             Cancel
           </button>
@@ -365,7 +375,7 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
             type="button"
             onClick={handleConfirmImport}
             disabled={!parseResult || totalTasks === 0}
-            className="flex items-center gap-1.5 px-4 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-500 rounded transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-1.5 px-4 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-500 rounded transition disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:outline-none"
           >
             <CheckCircle2 className="w-3.5 h-3.5" />
             <span>Import ({totalTasks} Tasks)</span>
@@ -375,3 +385,4 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
     </div>
   );
 };
+

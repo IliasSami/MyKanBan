@@ -34,49 +34,56 @@ export const ScrumMetricsBar: React.FC<ScrumMetricsBarProps> = ({ columns, tasks
   }, [percentage, totalPoints]);
 
   return (
-    <div className="bg-zinc-950 border-b border-zinc-800/80 px-4 lg:px-6 py-2">
+    <div className="bg-zinc-50 dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800/80 px-4 lg:px-6 py-2 transition-colors">
       <div className="max-w-[1920px] mx-auto flex flex-wrap items-center justify-between gap-4 text-xs">
         {/* Sprint Velocity Progress */}
         <div className="flex items-center gap-3 flex-1 min-w-[260px] max-w-lg">
-          <div className="flex items-center gap-1 text-zinc-400 font-medium">
-            <Target className="w-3.5 h-3.5 text-blue-400" />
+          <div className="flex items-center gap-1 text-zinc-600 dark:text-zinc-400 font-medium">
+            <Target className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
             <span>Velocity:</span>
           </div>
 
-          <div className="flex-1 bg-zinc-900 rounded-full h-1.5 overflow-hidden border border-zinc-800">
+          <div
+            role="progressbar"
+            aria-valuenow={percentage}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label="Sprint Velocity Progress"
+            className="flex-1 bg-zinc-200 dark:bg-zinc-900 rounded-full h-1.5 overflow-hidden border border-zinc-300 dark:border-zinc-800"
+          >
             <div
-              className="h-full bg-blue-500 rounded-full transition-all duration-300 ease-out"
+              className="h-full bg-blue-600 dark:bg-blue-500 rounded-full transition-all duration-300 ease-out"
               style={{ width: `${percentage}%` }}
             />
           </div>
 
           <div className="flex items-center gap-1.5 font-mono text-xs">
-            <span className="text-zinc-100 font-semibold">{donePoints}</span>
-            <span className="text-zinc-500">/</span>
-            <span className="text-zinc-400">{totalPoints} sp</span>
-            <span className="text-[11px] font-semibold text-blue-400 bg-blue-500/10 px-1.5 py-0.2 rounded border border-blue-500/20">
+            <span className="text-zinc-900 dark:text-zinc-100 font-semibold">{donePoints}</span>
+            <span className="text-zinc-400 dark:text-zinc-500">/</span>
+            <span className="text-zinc-600 dark:text-zinc-400">{totalPoints} sp</span>
+            <span className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 px-1.5 py-0.2 rounded border border-blue-200 dark:border-blue-500/20">
               {percentage}%
             </span>
           </div>
         </div>
 
         {/* Minimal Metrics Counters */}
-        <div className="flex items-center gap-4 text-xs font-mono text-zinc-400">
+        <div className="flex items-center gap-4 text-xs font-mono text-zinc-600 dark:text-zinc-400">
           <div className="flex items-center gap-1.5">
-            <CheckCircle2 className="w-3.5 h-3.5 text-zinc-500" />
+            <CheckCircle2 className="w-3.5 h-3.5 text-zinc-400 dark:text-zinc-500" />
             <span>Done:</span>
-            <span className="text-zinc-200 font-semibold">{doneTasksCount}/{totalTasksCount}</span>
-            <span className="text-zinc-600">({taskPercentage}%)</span>
+            <span className="text-zinc-900 dark:text-zinc-200 font-semibold">{doneTasksCount}/{totalTasksCount}</span>
+            <span className="text-zinc-400 dark:text-zinc-600">({taskPercentage}%)</span>
           </div>
 
           <div className="flex items-center gap-1.5">
-            <Layers className="w-3.5 h-3.5 text-zinc-500" />
+            <Layers className="w-3.5 h-3.5 text-zinc-400 dark:text-zinc-500" />
             <span>Columns:</span>
-            <span className="text-zinc-200 font-semibold">{columns.length}</span>
+            <span className="text-zinc-900 dark:text-zinc-200 font-semibold">{columns.length}</span>
           </div>
 
           {percentage === 100 && totalPoints > 0 && (
-            <span className="text-blue-400 font-semibold font-sans bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20 text-[11px]">
+            <span className="text-blue-600 dark:text-blue-400 font-semibold font-sans bg-blue-50 dark:bg-blue-500/10 px-2 py-0.5 rounded border border-blue-200 dark:border-blue-500/20 text-[11px]">
               Sprint 100% Complete
             </span>
           )}
@@ -85,3 +92,4 @@ export const ScrumMetricsBar: React.FC<ScrumMetricsBarProps> = ({ columns, tasks
     </div>
   );
 };
+

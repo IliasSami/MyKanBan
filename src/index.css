@@ -1,14 +1,34 @@
 @import "tailwindcss";
 
+@variant dark (&:where(.dark, .dark *));
+
 @layer base {
   :root {
+    /* Light Mode Default: Crisp Zinc Monochrome + Precision Blue */
+    --bg-canvas: #fafafa;
+    --bg-surface: #ffffff;
+    --bg-surface-elevated: #f4f4f5;
+    --border-subtle: #e4e4e7;
+    --border-strong: #d4d4d8;
+    
+    --text-primary: #18181b;
+    --text-secondary: #52525b;
+    --text-muted: #71717a;
+    
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
+    --accent-subtle: rgba(37, 99, 235, 0.08);
+    --accent-border: rgba(37, 99, 235, 0.25);
+  }
+
+  .dark {
+    /* Dark Mode: Pure Zinc Architectural Theme */
     --bg-canvas: #09090b;
     --bg-surface: #121215;
     --bg-surface-elevated: #18181b;
     --border-subtle: #27272a;
     --border-strong: #3f3f46;
     
-    /* 2-Color Design: Color 1 (Zinc Monochrome) & Color 2 (Precision Blue) */
     --text-primary: #f4f4f5;
     --text-secondary: #a1a1aa;
     --text-muted: #71717a;
@@ -17,6 +37,39 @@
     --accent-hover: #2563eb;
     --accent-subtle: rgba(59, 130, 246, 0.08);
     --accent-border: rgba(59, 130, 246, 0.25);
+  }
+
+  .high-contrast {
+    --border-subtle: #18181b;
+    --border-strong: #000000;
+    --text-primary: #000000;
+    --text-secondary: #18181b;
+    --text-muted: #27272a;
+    --accent: #1d4ed8;
+  }
+
+  .dark.high-contrast {
+    --bg-canvas: #000000;
+    --bg-surface: #0a0a0a;
+    --bg-surface-elevated: #141414;
+    --border-subtle: #71717a;
+    --border-strong: #ffffff;
+    --text-primary: #ffffff;
+    --text-secondary: #f4f4f5;
+    --text-muted: #e4e4e7;
+    --accent: #60a5fa;
+  }
+
+  .text-large {
+    font-size: 110%;
+  }
+
+  .reduce-motion,
+  .reduce-motion * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
@@ -28,8 +81,6 @@ html, body {
   margin: 0;
   padding: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  background-color: #09090b;
-  color: #f4f4f5;
   min-height: 100vh;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
@@ -42,14 +93,15 @@ html, body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #09090b;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #27272a;
+  background: rgba(113, 113, 122, 0.3);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3f3f46;
+  background: rgba(113, 113, 122, 0.5);
 }
+

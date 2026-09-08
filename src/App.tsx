@@ -5,6 +5,8 @@ import { KanbanBoard } from './components/KanbanBoard';
 import { ImportModal } from './components/ImportModal';
 import { TaskModal } from './components/TaskModal';
 import { CollabModal } from './components/CollabModal';
+import { AccessibilityMenu } from './components/AccessibilityMenu';
+import { AccessibilityProvider } from './context/AccessibilityContext';
 import { useKanbanStore } from './services/store';
 import { useConvexKanban } from './services/useConvexKanban';
 import type { Task } from './types/kanban';
@@ -24,6 +26,7 @@ function KanbanView({ store }: KanbanViewProps) {
     setCurrentProjectId,
     createProject,
     joinProjectByCode,
+    leaveProject,
     board,
     addTask,
     updateTask,
@@ -37,6 +40,7 @@ function KanbanView({ store }: KanbanViewProps) {
 
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [isCollabOpen, setIsCollabOpen] = useState(false);
+  const [isA11yOpen, setIsA11yOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   const handleExportMarkdown = () => {
@@ -66,7 +70,15 @@ function KanbanView({ store }: KanbanViewProps) {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col selection:bg-blue-600 selection:text-white">
+    <div className="min-h-screen bg-zinc-100/70 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 flex flex-col selection:bg-blue-600 selection:text-white transition-colors duration-150">
+      {/* WCAG Skip Link */}
+      <a
+        href="#kanban-main"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded-lg focus:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-400 font-medium text-xs tracking-wide uppercase"
+      >
+        Skip to Kanban Board
+      </a>
+
       {/* Sticky Top Navigation */}
       <Navbar
         project={currentProject}
@@ -74,6 +86,7 @@ function KanbanView({ store }: KanbanViewProps) {
         user={user}
         onOpenImport={() => setIsImportOpen(true)}
         onOpenCollab={() => setIsCollabOpen(true)}
+        onOpenA11y={() => setIsA11yOpen(true)}
         onExportMarkdown={handleExportMarkdown}
         onExportCSV={handleExportCSV}
       />
@@ -123,6 +136,13 @@ function KanbanView({ store }: KanbanViewProps) {
         onJoinCode={joinProjectByCode}
         onCreateProject={createProject}
         onSelectProject={(id) => setCurrentProjectId(id)}
+        onLeaveProject={leaveProject}
+      />
+
+      {/* Accessibility & Display Controls Modal */}
+      <AccessibilityMenu
+        isOpen={isA11yOpen}
+        onClose={() => setIsA11yOpen(false)}
       />
     </div>
   );
@@ -140,7 +160,11 @@ function LocalApp() {
 
 export function App() {
   const hasConvex = Boolean(import.meta.env.VITE_CONVEX_URL);
-  return hasConvex ? <ConvexApp /> : <LocalApp />;
+  return (
+    <AccessibilityProvider>
+      {hasConvex ? <ConvexApp /> : <LocalApp />}
+    </AccessibilityProvider>
+  );
 }
 
 export default App;

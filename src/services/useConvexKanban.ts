@@ -7,6 +7,7 @@ import { cleanMarkdownText, cleanMarkdownDescription } from '../utils/parser';
 
 const STORAGE_KEY_USER = 'mykanban_user_profile';
 const STORAGE_KEY_CODE = 'mykanban_active_collab_code';
+const STORAGE_KEY_SAVED_CODES = 'mykanban_saved_room_codes';
 
 const defaultUser: UserProfile = {
   id: 'user-' + Math.random().toString(36).substring(2, 8),
@@ -15,10 +16,42 @@ const defaultUser: UserProfile = {
   initials: 'AD',
 };
 
+function getInitialRoomCode(): string {
+  if (typeof window !== 'undefined') {
+    const params = new URLSearchParams(window.location.search);
+    const urlCode = params.get('room') || params.get('code');
+    if (urlCode) {
+      const formatted = urlCode.trim().toUpperCase();
+      localStorage.setItem(STORAGE_KEY_CODE, formatted);
+      return formatted;
+    }
+  }
+  const saved = localStorage.getItem(STORAGE_KEY_CODE);
+  if (saved) return saved;
+  // If first time visit with no code, generate a unique private code prefix
+  const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+  const nums = "23456789";
+  let code = "PRV-";
+  for (let i = 0; i < 3; i++) code += letters.charAt(Math.floor(Math.random() * letters.length));
+  for (let i = 0; i < 3; i++) code += nums.charAt(Math.floor(Math.random() * nums.length));
+  localStorage.setItem(STORAGE_KEY_CODE, code);
+  return code;
+}
+
+function getSavedCodes(active: string): string[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_SAVED_CODES);
+    const list: string[] = raw ? JSON.parse(raw) : [];
+    if (!list.includes(active)) list.push(active);
+    return list;
+  } catch {
+    return [active];
+  }
+}
+
 export function useConvexKanban() {
-  const [activeCode, setActiveCode] = useState<string>(() => {
-    return localStorage.getItem(STORAGE_KEY_CODE) || 'XBW-843';
-  });
+  const [activeCode, setActiveCode] = useState<string>(() => getInitialRoomCode());
+  const [savedCodes, setSavedCodes] = useState<string[]>(() => getSavedCodes(activeCode));
 
   const [user, setUser] = useState<UserProfile>(() => {
     try {
@@ -29,26 +62,15 @@ export function useConvexKanban() {
     }
   });
 
-  // Convex Queries
+  // Convex Queries: Only query current room and user's saved private rooms
   const projectData = useQuery(api.projects.getProjectByCollabCode, { collabCode: activeCode });
-  const allProjects = useQuery(api.projects.listProjects);
+  const userProjects = useQuery(api.projects.getProjectsByCodes, { codes: savedCodes });
   const boardId = projectData?.board?._id;
 
   const rawBoardData = useQuery(
     api.boards.getBoardData,
     boardId ? { boardId: boardId as Id<"boards"> } : "skip"
   );
-
-  // Sync activeCode if backend provided a fallback project (e.g. invalid code entered)
-  useState(() => {
-    // Initial check
-  });
-  useMemo(() => {
-    if (projectData?.project?.collabCode && projectData.project.collabCode !== activeCode) {
-      setActiveCode(projectData.project.collabCode);
-      localStorage.setItem(STORAGE_KEY_CODE, projectData.project.collabCode);
-    }
-  }, [projectData?.project?.collabCode, activeCode]);
 
   // Convex Mutations
   const createProjectMutation = useMutation(api.projects.createProject);
@@ -60,6 +82,29 @@ export function useConvexKanban() {
   const updateColumnMutation = useMutation(api.boards.updateColumn);
   const deleteColumnMutation = useMutation(api.boards.deleteColumn);
   const importBoardMutation = useMutation(api.boards.importBoardData);
+
+  // Auto-provision private workspace if projectData === null (e.g. brand new unique code)
+  const [isProvisioning, setIsProvisioning] = useState(false);
+  useState(() => {
+    // initial
+  });
+
+  useMemo(() => {
+    if (projectData === null && !isProvisioning) {
+      setIsProvisioning(true);
+      createProjectMutation({
+        title: 'My Workspace',
+        customCode: activeCode,
+      }).then((res) => {
+        setIsProvisioning(false);
+        const updated = Array.from(new Set([...savedCodes, res.collabCode]));
+        setSavedCodes(updated);
+        localStorage.setItem(STORAGE_KEY_SAVED_CODES, JSON.stringify(updated));
+      }).catch(() => {
+        setIsProvisioning(false);
+      });
+    }
+  }, [projectData, activeCode, isProvisioning, createProjectMutation, savedCodes]);
 
   // User Profile
   const updateUserProfile = useCallback((patch: Partial<UserProfile>) => {
@@ -120,7 +165,7 @@ export function useConvexKanban() {
   const currentProject: Project = useMemo(() => {
     return {
       id: projectData?.project?._id || 'proj-active',
-      title: projectData?.project?.title || 'Active Project',
+      title: projectData?.project?.title || 'Private Workspace',
       collabCode: projectData?.project?.collabCode || activeCode,
       createdAt: projectData?.project?.createdAt || Date.now(),
       updatedAt: projectData?.project?.updatedAt || Date.now(),
@@ -128,41 +173,51 @@ export function useConvexKanban() {
   }, [projectData, activeCode]);
 
   const projects: Project[] = useMemo(() => {
-    if (!allProjects || allProjects.length === 0) {
+    if (!userProjects || userProjects.length === 0) {
       return [currentProject];
     }
-    return allProjects.map((p) => ({
+    return userProjects.map((p) => ({
       id: p._id,
       title: p.title,
       collabCode: p.collabCode,
       createdAt: p.createdAt,
       updatedAt: p.updatedAt,
     }));
-  }, [allProjects, currentProject]);
+  }, [userProjects, currentProject]);
 
   // Switch to project by ID
   const setCurrentProjectId = useCallback((projectId: string) => {
-    const target = allProjects?.find((p) => p._id === projectId);
+    const target = userProjects?.find((p) => p._id === projectId);
     if (target) {
       setActiveCode(target.collabCode);
       localStorage.setItem(STORAGE_KEY_CODE, target.collabCode);
+      const updated = Array.from(new Set([...savedCodes, target.collabCode]));
+      setSavedCodes(updated);
+      localStorage.setItem(STORAGE_KEY_SAVED_CODES, JSON.stringify(updated));
     }
-  }, [allProjects]);
+  }, [userProjects, savedCodes]);
 
   // Create Project
   const createProject = useCallback(async (title: string, description?: string) => {
     const result = await createProjectMutation({ title, description });
     setActiveCode(result.collabCode);
     localStorage.setItem(STORAGE_KEY_CODE, result.collabCode);
-  }, [createProjectMutation]);
+    const updated = Array.from(new Set([...savedCodes, result.collabCode]));
+    setSavedCodes(updated);
+    localStorage.setItem(STORAGE_KEY_SAVED_CODES, JSON.stringify(updated));
+  }, [createProjectMutation, savedCodes]);
 
   // Join Project by Code
   const joinProjectByCode = useCallback((code: string) => {
     const formatted = code.trim().toUpperCase();
     setActiveCode(formatted);
     localStorage.setItem(STORAGE_KEY_CODE, formatted);
+    const updated = Array.from(new Set([...savedCodes, formatted]));
+    setSavedCodes(updated);
+    localStorage.setItem(STORAGE_KEY_SAVED_CODES, JSON.stringify(updated));
     return true;
-  }, []);
+  }, [savedCodes]);
+
 
 
   // Add Task
@@ -262,6 +317,17 @@ export function useConvexKanban() {
     });
   }, [boardId, importBoardMutation]);
 
+  // Leave Project (remove from saved list)
+  const leaveProject = useCallback((collabCode: string) => {
+    const updated = savedCodes.filter((c) => c !== collabCode);
+    setSavedCodes(updated);
+    localStorage.setItem(STORAGE_KEY_SAVED_CODES, JSON.stringify(updated));
+    if (activeCode === collabCode && updated.length > 0) {
+      setActiveCode(updated[0]);
+      localStorage.setItem(STORAGE_KEY_CODE, updated[0]);
+    }
+  }, [savedCodes, activeCode]);
+
   return {
     user,
     updateUserProfile,
@@ -271,6 +337,7 @@ export function useConvexKanban() {
     setCurrentProjectId,
     createProject,
     joinProjectByCode,
+    leaveProject,
     board,
     addTask,
     updateTask,
@@ -282,3 +349,4 @@ export function useConvexKanban() {
     importParsedData,
   };
 }
+
