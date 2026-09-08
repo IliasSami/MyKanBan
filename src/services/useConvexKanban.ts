@@ -31,12 +31,24 @@ export function useConvexKanban() {
 
   // Convex Queries
   const projectData = useQuery(api.projects.getProjectByCollabCode, { collabCode: activeCode });
+  const allProjects = useQuery(api.projects.listProjects);
   const boardId = projectData?.board?._id;
 
   const rawBoardData = useQuery(
     api.boards.getBoardData,
     boardId ? { boardId: boardId as Id<"boards"> } : "skip"
   );
+
+  // Sync activeCode if backend provided a fallback project (e.g. invalid code entered)
+  useState(() => {
+    // Initial check
+  });
+  useMemo(() => {
+    if (projectData?.project?.collabCode && projectData.project.collabCode !== activeCode) {
+      setActiveCode(projectData.project.collabCode);
+      localStorage.setItem(STORAGE_KEY_CODE, projectData.project.collabCode);
+    }
+  }, [projectData?.project?.collabCode, activeCode]);
 
   // Convex Mutations
   const createProjectMutation = useMutation(api.projects.createProject);
@@ -115,6 +127,28 @@ export function useConvexKanban() {
     };
   }, [projectData, activeCode]);
 
+  const projects: Project[] = useMemo(() => {
+    if (!allProjects || allProjects.length === 0) {
+      return [currentProject];
+    }
+    return allProjects.map((p) => ({
+      id: p._id,
+      title: p.title,
+      collabCode: p.collabCode,
+      createdAt: p.createdAt,
+      updatedAt: p.updatedAt,
+    }));
+  }, [allProjects, currentProject]);
+
+  // Switch to project by ID
+  const setCurrentProjectId = useCallback((projectId: string) => {
+    const target = allProjects?.find((p) => p._id === projectId);
+    if (target) {
+      setActiveCode(target.collabCode);
+      localStorage.setItem(STORAGE_KEY_CODE, target.collabCode);
+    }
+  }, [allProjects]);
+
   // Create Project
   const createProject = useCallback(async (title: string, description?: string) => {
     const result = await createProjectMutation({ title, description });
@@ -129,6 +163,7 @@ export function useConvexKanban() {
     localStorage.setItem(STORAGE_KEY_CODE, formatted);
     return true;
   }, []);
+
 
   // Add Task
   const addTask = useCallback(async (taskData: {
@@ -230,10 +265,10 @@ export function useConvexKanban() {
   return {
     user,
     updateUserProfile,
-    projects: [currentProject],
+    projects,
     currentProject,
     currentProjectId: currentProject.id,
-    setCurrentProjectId: () => {},
+    setCurrentProjectId,
     createProject,
     joinProjectByCode,
     board,

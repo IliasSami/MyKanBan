@@ -138,24 +138,43 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
     >
       <div className="flex-1 overflow-x-auto p-4 lg:p-6 bg-zinc-950">
         <div className="flex items-start gap-4 min-w-max pb-6">
-          {board.columns.map((column) => {
-            const columnTasks = board.tasks
-              .filter((t) => t.columnId === column.id)
-              .sort((a, b) => a.order - b.order);
+          {board.columns.length === 0 ? (
+            <div className="flex items-start gap-4">
+              {['Backlog', 'Sprint To-Do', 'In Progress', 'Done'].map((placeholder) => (
+                <div
+                  key={placeholder}
+                  className="w-72 min-w-[288px] bg-zinc-900/40 border border-zinc-850 rounded-xl p-3 flex flex-col gap-3 animate-pulse"
+                >
+                  <div className="flex items-center justify-between pb-2 border-b border-zinc-800/60">
+                    <span className="text-xs font-mono text-zinc-500 uppercase tracking-wider">{placeholder}</span>
+                    <div className="h-4 w-6 bg-zinc-800 rounded-full" />
+                  </div>
+                  <div className="h-20 bg-zinc-900/80 border border-zinc-800/50 rounded-lg" />
+                  <div className="h-24 bg-zinc-900/80 border border-zinc-800/50 rounded-lg" />
+                  <div className="h-16 bg-zinc-900/80 border border-zinc-800/50 rounded-lg" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            board.columns.map((column) => {
+              const columnTasks = board.tasks
+                .filter((t) => t.columnId === column.id)
+                .sort((a, b) => a.order - b.order);
 
-            return (
-              <KanbanColumn
-                key={column.id}
-                column={column}
-                tasks={columnTasks}
-                onOpenTaskDetail={onOpenTaskDetail}
-                onAddTask={onAddTask}
-                onUpdateColumn={onUpdateColumn}
-                onDeleteColumn={onDeleteColumn}
-                onDeleteTask={onDeleteTask}
-              />
-            );
-          })}
+              return (
+                <KanbanColumn
+                  key={column.id}
+                  column={column}
+                  tasks={columnTasks}
+                  onOpenTaskDetail={onOpenTaskDetail}
+                  onAddTask={onAddTask}
+                  onUpdateColumn={onUpdateColumn}
+                  onDeleteColumn={onDeleteColumn}
+                  onDeleteTask={onDeleteTask}
+                />
+              );
+            })
+          )}
 
           {/* Add New Column */}
           <div className="w-72 min-w-[288px]">
