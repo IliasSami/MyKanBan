@@ -67,24 +67,50 @@ export async function convertWithAI(
     throw new Error('Please enter some text or upload a document to convert.');
   }
 
-  const endpoint = `${baseUrl}/chat/completions`;
+  const payload = {
+    model,
+    messages: [
+      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'user', content: rawText },
+    ],
+    temperature: 0.2,
+    apiKey,
+    baseUrl,
+  };
 
   try {
-    const res = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model,
-        messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user', content: rawText },
-        ],
-        temperature: 0.2,
-      }),
-    });
+    // 1. Try Cloudflare Pages edge proxy first (/api/ai-convert) to bypass browser CORS
+    let res: Response | null = null;
+    try {
+      res = await fetch('/api/ai-convert', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+          'x-nara-base-url': baseUrl,
+        },
+        body: JSON.stringify(payload),
+      });
+    } catch {
+      // Not on Pages or proxy failed
+      res = null;
+    }
+
+    // 2. If proxy was not found (e.g. status 404 in dev), attempt direct endpoint
+    if (!res || res.status === 404) {
+      res = await fetch(`${baseUrl}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model,
+          messages: payload.messages,
+          temperature: 0.2,
+        }),
+      });
+    }
 
     const data = await res.json();
 
@@ -102,6 +128,9 @@ export async function convertWithAI(
     return result.trim();
   } catch (err: any) {
     console.error('AI conversion failed:', err);
+    if (err?.message?.includes('Load failed') || err?.name === 'TypeError') {
+      throw new Error('Network or CORS policy blocked direct connection to Nara Router.');
+    }
     throw err;
   }
 }

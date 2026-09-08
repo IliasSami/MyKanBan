@@ -211,7 +211,7 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
     if (!content.trim()) return;
     setIsConverting(true);
     setAiError(null);
-    setConversionPhase(`Connecting to Nara Router (${aiSettings.model})...`);
+    setConversionPhase(`Connecting to Nara AI (${aiSettings.model})...`);
 
     try {
       setConversionPhase('Structuring columns, extracting tasks & assigning tags...');
@@ -227,7 +227,16 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
       setConvertedSuccess(true);
       setConversionPhase('');
     } catch (err: any) {
-      setAiError(err.message || 'AI conversion request failed.');
+      console.warn('AI conversion failed, automatically activating local heuristic parser:', err);
+      // Auto-fallback: parse with smart local heuristic so the user is never blocked
+      const fallbackResult = convertWithLocalHeuristic(content);
+      setContent(fallbackResult);
+      setDocType('markdown');
+      setInputMode('editor');
+      setConvertedSuccess(true);
+      setAiError(
+        `Nara Router notice: ${err.message || 'Key credit balance exhausted'}. Structured automatically using Smart Local Engine!`
+      );
       setConversionPhase('');
     } finally {
       setIsConverting(false);
@@ -675,6 +684,13 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
                         </span>
                       </span>
                     ))}
+                  </div>
+                )}
+
+                {aiError && (
+                  <div className="p-2 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 text-amber-800 dark:text-amber-300 text-[11px] flex items-center gap-1.5">
+                    <Zap className="w-3.5 h-3.5 shrink-0 text-amber-500" />
+                    <span>{aiError}</span>
                   </div>
                 )}
               </div>
