@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   parseMarkdown,
   parseCSV,
+  parseJSON,
   extractTaskMetadata,
   exportToMarkdown,
   exportToCSV,
@@ -113,5 +114,42 @@ describe('Kanban Ingestion Engine', () => {
     const csv = exportToCSV(columns, tasks);
     expect(csv).toContain('Task A');
     expect(csv).toContain('To Do');
+  });
+
+  it('parses KBF JSON format with WIP limits, subtasks, and story points', () => {
+    const json = JSON.stringify({
+      title: 'Sprint 26 KBF',
+      columns: [
+        {
+          title: 'In Progress',
+          wipLimit: 3,
+          tasks: [
+            {
+              title: 'Build KBF Engine',
+              description: 'Native schema processing',
+              priority: 'urgent',
+              storyPoints: 5,
+              assignee: 'Alex',
+              tags: ['kbf', 'core'],
+              subtasks: [
+                { title: 'Write parser', completed: true },
+                { title: 'Add schema validation', completed: false },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+
+    const result = parseJSON(json);
+    expect(result.title).toBe('Sprint 26 KBF');
+    expect(result.columns.length).toBe(1);
+    expect(result.columns[0].title).toBe('In Progress');
+    expect(result.columns[0].wipLimit).toBe(3);
+    expect(result.columns[0].tasks[0].title).toBe('Build KBF Engine');
+    expect(result.columns[0].tasks[0].priority).toBe('urgent');
+    expect(result.columns[0].tasks[0].storyPoints).toBe(5);
+    expect(result.columns[0].tasks[0].subtasks?.length).toBe(2);
+    expect(result.columns[0].tasks[0].subtasks?.[0].completed).toBe(true);
   });
 });

@@ -50,5 +50,9 @@ export interface UserProfile {
 
 export interface ParseResult {
   title: string;
-  columns: { title: string; tasks: Omit<Task, 'id' | 'columnId' | 'order' | 'createdAt'>[] }[];
+  columns: {
+    title: string;
+    wipLimit?: number;
+    tasks: Omit<Task, 'id' | 'columnId' | 'order' | 'createdAt'>[];
+  }[];
 }

@@ -500,6 +500,7 @@ export function useKanbanStore() {
           id: `col-${Math.random().toString(36).substring(2, 9)}`,
           title: pCol.title,
           order: finalColumns.length + cIdx,
+          wipLimit: (pCol as any).wipLimit,
         };
         finalColumns.push(col);
       }

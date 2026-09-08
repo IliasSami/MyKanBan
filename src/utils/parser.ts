@@ -356,6 +356,89 @@ export function parseCSV(csvContent: string): ParseResult {
   };
 }
 
+function parseJSONTask(t: any): ParsedTaskDraft {
+  const title = cleanMarkdownText(t.title || t.name || t.summary || 'Untitled Task');
+  let priority: Priority = 'medium';
+  const p = (t.priority || '').toString().toLowerCase();
+  if (p === 'urgent' || p === 'critical') priority = 'urgent';
+  else if (p === 'high') priority = 'high';
+  else if (p === 'low') priority = 'low';
+  else priority = 'medium';
+
+  const storyPoints = typeof t.storyPoints === 'number'
+    ? t.storyPoints
+    : typeof t.points === 'number'
+    ? t.points
+    : typeof t.estimate === 'number'
+    ? t.estimate
+    : undefined;
+
+  const assignee = t.assignee || t.owner || undefined;
+  const description = t.description || t.details || t.notes
+    ? cleanMarkdownDescription(t.description || t.details || t.notes)
+    : undefined;
+
+  const tags: string[] = [];
+  if (Array.isArray(t.tags)) {
+    tags.push(...t.tags.map((x: any) => cleanMarkdownText(String(x))));
+  } else if (typeof t.tags === 'string') {
+    tags.push(...t.tags.split(/[,;|]/).map((x: string) => cleanMarkdownText(x)).filter(Boolean));
+  }
+
+  const subtasks = Array.isArray(t.subtasks)
+    ? t.subtasks.map((s: any) => ({
+        id: s.id || `sub-${Math.random().toString(36).substring(2, 9)}`,
+        title: cleanMarkdownText(typeof s === 'string' ? s : s.title || s.text || ''),
+        completed: Boolean(s.completed || s.done),
+      }))
+    : undefined;
+
+  return {
+    title,
+    description,
+    priority,
+    storyPoints,
+    assignee: assignee ? cleanMarkdownText(assignee) : undefined,
+    tags,
+    subtasks,
+  };
+}
+
+/**
+ * Parses JSON formatted board data (KBF format or standard Kanban objects).
+ */
+export function parseJSON(jsonContent: string): ParseResult {
+  const data = JSON.parse(jsonContent);
+  const title = cleanMarkdownText(data.title || data.boardTitle || data.name || 'Imported Board');
+
+  if (Array.isArray(data.columns)) {
+    return {
+      title,
+      columns: data.columns.map((col: any) => ({
+        title: cleanMarkdownText(col.title || col.name || 'Column'),
+        wipLimit: typeof col.wipLimit === 'number' ? col.wipLimit : undefined,
+        tasks: Array.isArray(col.tasks) ? col.tasks.map(parseJSONTask) : [],
+      })),
+    };
+  }
+
+  if (Array.isArray(data)) {
+    const columnsMap = new Map<string, ParsedTaskDraft[]>();
+    for (const item of data) {
+      const colName = cleanMarkdownText(item.column || item.status || item.stage || 'To Do');
+      if (!columnsMap.has(colName)) columnsMap.set(colName, []);
+      columnsMap.get(colName)!.push(parseJSONTask(item));
+    }
+    const columns: ParsedColumnDraft[] = [];
+    for (const [colTitle, tasks] of columnsMap.entries()) {
+      columns.push({ title: colTitle, tasks });
+    }
+    return { title, columns };
+  }
+
+  throw new Error('Invalid JSON board format. Expected an object with "columns" array or an array of tasks.');
+}
+
 /**
  * Converts a board structure to clean Markdown format for exporting.
  */

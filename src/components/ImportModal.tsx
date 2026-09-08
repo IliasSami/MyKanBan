@@ -7,7 +7,7 @@ import {
   CheckCircle2,
   FileUp,
 } from 'lucide-react';
-import { parseMarkdown, parseCSV } from '../utils/parser';
+import { parseMarkdown, parseCSV, parseJSON } from '../utils/parser';
 
 interface ImportModalProps {
   isOpen: boolean;
@@ -47,6 +47,67 @@ const SAMPLE_MARKDOWN = `# Sprint 25: AI Workflow Engine
 - [x] Minimal two-color design system configuration #medium ~1
 `;
 
+const SAMPLE_JSON = `{
+  "title": "Sprint 26: Distributed Architecture",
+  "columns": [
+    {
+      "title": "Sprint Backlog",
+      "wipLimit": 10,
+      "tasks": [
+        {
+          "title": "Configure Edge Cache invalidation",
+          "description": "Purge Cloudflare Edge cache when Convex mutations complete",
+          "priority": "high",
+          "storyPoints": 5,
+          "assignee": "Alex",
+          "tags": ["edge", "cache", "performance"],
+          "subtasks": [
+            { "title": "Cache tag tagging", "completed": true },
+            { "title": "Instant purge webhook", "completed": false }
+          ]
+        },
+        {
+          "title": "Zero-trust session cookies audit",
+          "priority": "urgent",
+          "storyPoints": 3,
+          "assignee": "Sarah",
+          "tags": ["security", "auth"]
+        }
+      ]
+    },
+    {
+      "title": "In Progress",
+      "wipLimit": 4,
+      "tasks": [
+        {
+          "title": "KBF Workflow schema validation",
+          "description": "Dynamic Kanban schema supporting subtasks, WIP constraints and metadata",
+          "priority": "urgent",
+          "storyPoints": 5,
+          "assignee": "Alex",
+          "tags": ["kbf", "engine"],
+          "subtasks": [
+            { "title": "JSON / YAML Parser engine", "completed": true },
+            { "title": "Visual preview integration", "completed": true }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Done",
+      "tasks": [
+        {
+          "title": "WCAG AAA Accessibility Suite",
+          "priority": "high",
+          "storyPoints": 5,
+          "assignee": "Alex",
+          "tags": ["a11y", "ui"]
+        }
+      ]
+    }
+  ]
+}`;
+
 const SAMPLE_CSV = `Title,Column,Assignee,Priority,Story Points,Tags,Description
 "Setup Cloudflare Pages CI/CD",Done,Alex,medium,2,"devops,cloudflare","Automate preview deployments on Git push"
 "Build Markdown Parser Engine",In Progress,Alex,urgent,5,"feature,parser","Extract headers, checkboxes, and metadata tags"
@@ -57,7 +118,7 @@ const SAMPLE_CSV = `Title,Column,Assignee,Priority,Story Points,Tags,Description
 
 export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImport }) => {
   const [activeTab, setActiveTab] = useState<'paste' | 'upload'>('paste');
-  const [format, setFormat] = useState<'markdown' | 'csv'>('markdown');
+  const [format, setFormat] = useState<'markdown' | 'json' | 'csv'>('markdown');
   const [textContent, setTextContent] = useState(SAMPLE_MARKDOWN);
   const [replaceExisting, setReplaceExisting] = useState(true);
   const [dragOver, setDragOver] = useState(false);
@@ -65,12 +126,15 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
 
   // Live Parsing preview
   const parseResult = useMemo(() => {
-    if (!textContent.trim()) return null;
+    const trimmed = textContent.trim();
+    if (!trimmed) return null;
     try {
-      if (format === 'markdown') {
-        return parseMarkdown(textContent);
+      if (format === 'json' || trimmed.startsWith('{') || trimmed.startsWith('[')) {
+        return parseJSON(trimmed);
+      } else if (format === 'csv') {
+        return parseCSV(trimmed);
       } else {
-        return parseCSV(textContent);
+        return parseMarkdown(trimmed);
       }
     } catch {
       return null;
@@ -95,7 +159,8 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
   const handleFileUpload = (file: File) => {
     setFileName(file.name);
     const isCsv = file.name.endsWith('.csv');
-    setFormat(isCsv ? 'csv' : 'markdown');
+    const isJson = file.name.endsWith('.json') || file.name.endsWith('.kbf');
+    setFormat(isCsv ? 'csv' : isJson ? 'json' : 'markdown');
 
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -202,6 +267,17 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
               <button
                 type="button"
                 onClick={() => {
+                  setFormat('json');
+                  setTextContent(SAMPLE_JSON);
+                  setActiveTab('paste');
+                }}
+                className="px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-850 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800 transition focus-visible:ring-2 focus-visible:ring-blue-600"
+              >
+                Flow.json
+              </button>
+              <button
+                type="button"
+                onClick={() => {
                   setFormat('csv');
                   setTextContent(SAMPLE_CSV);
                   setActiveTab('paste');
@@ -232,7 +308,7 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
               <input
                 id="file-upload-input"
                 type="file"
-                accept=".md,.markdown,.csv,.txt"
+                accept=".md,.markdown,.csv,.txt,.json,.kbf"
                 className="hidden"
                 onChange={(e) => {
                   if (e.target.files?.[0]) handleFileUpload(e.target.files[0]);
@@ -246,7 +322,7 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
                   Select or drag a file here
                 </p>
                 <p className="text-[11px] text-zinc-500 mt-0.5">
-                  Markdown (.md) or CSV (.csv)
+                  Markdown (.md), JSON / KBF (.json), or CSV (.csv)
                 </p>
               </div>
               {fileName && (
@@ -275,6 +351,16 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
                     <input
                       type="radio"
                       name="format"
+                      checked={format === 'json'}
+                      onChange={() => setFormat('json')}
+                      className="accent-blue-600 focus-visible:ring-2 focus-visible:ring-blue-600"
+                    />
+                    <span>JSON (KBF)</span>
+                  </label>
+                  <label className="flex items-center gap-1.5 cursor-pointer text-zinc-700 dark:text-zinc-300">
+                    <input
+                      type="radio"
+                      name="format"
                       checked={format === 'csv'}
                       onChange={() => setFormat('csv')}
                       className="accent-blue-600 focus-visible:ring-2 focus-visible:ring-blue-600"
@@ -291,7 +377,7 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
               <textarea
                 value={textContent}
                 onChange={(e) => setTextContent(e.target.value)}
-                placeholder="Paste Markdown or CSV..."
+                placeholder="Paste Markdown, JSON / KBF, or CSV..."
                 rows={9}
                 className="w-full bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-lg p-3 font-mono text-xs text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-blue-500 focus-visible:ring-2 focus-visible:ring-blue-600 transition resize-y leading-relaxed"
               />
